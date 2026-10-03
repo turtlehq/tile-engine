@@ -27,12 +27,27 @@ export function simplifyTabGroup(
 	parent.parent.views.splice(parent.index, 1);
 	parent.parent.splitPoints.splice(Math.min(parent.index, parent.parent.splitPoints.length - 1), 1);
 
-	/// Remove a split that has become a single view, then collapse any resulting
-	/// single-child splits up the tree.
+	/// Remove a split that has collapsed, then collapse any resulting
+	/// single-child splits up the tree. A split can reach zero views when its
+	/// last child is removed (e.g. an inspector band); splice it out of its
+	/// parent rather than writing `undefined` into the tree.
 	const simplifySplit = (split: SplitConfig) => {
 		if (split.views.length > 1) return;
-		const only = split.views[0]!;
 		const splitParent = nodeParentMap.get(split);
+		if (split.views.length === 0) {
+			if (splitParent) {
+				splitParent.parent.views.splice(splitParent.index, 1);
+				splitParent.parent.splitPoints.splice(
+					Math.min(splitParent.index, splitParent.parent.splitPoints.length - 1),
+					1
+				);
+				simplifySplit(splitParent.parent);
+			} else {
+				config.root = undefined;
+			}
+			return;
+		}
+		const only = split.views[0]!;
 		if (splitParent) {
 			splitParent.parent.views[splitParent.index] = only;
 			simplifySplit(splitParent.parent);
@@ -106,6 +121,7 @@ export function areConfigsEquivalent(config1: LayoutConfig, config2: LayoutConfi
 		tabGroup1: TabGroupConfig,
 		tabGroup2: TabGroupConfig
 	): boolean => {
+		if ((tabGroup1.locked ?? false) !== (tabGroup2.locked ?? false)) return false;
 		if (tabGroup1.activeTabIndex !== tabGroup2.activeTabIndex) return false;
 		if (tabGroup1.tabs.length !== tabGroup2.tabs.length) return false;
 		for (let i = 0; i < tabGroup1.tabs.length; i++) {
@@ -223,14 +239,17 @@ function parseSplitConfig(object: unknown, path: string): SplitConfig {
 
 function parseTabGroupConfig(object: unknown, path: string): TabGroupConfig {
 	if (typeof object !== 'object' || object === null) throw new Error(`${path}: expected an object`);
-	const { tabs, activeTabIndex } = object as Record<string, unknown>;
+	const { tabs, activeTabIndex, locked } = object as Record<string, unknown>;
 	if (!Array.isArray(tabs) || tabs.length < 1)
 		throw new Error(`${path}.tabs: expected a non-empty array`);
 	if (typeof activeTabIndex !== 'number')
 		throw new Error(`${path}.activeTabIndex: expected a number`);
+	if (locked !== undefined && typeof locked !== 'boolean')
+		throw new Error(`${path}.locked: expected a boolean`);
 	return {
 		tabs: tabs.map((t, i) => parseId(t, `${path}.tabs[${i}]`)) as [Id, ...Id[]],
-		activeTabIndex
+		activeTabIndex,
+		...(typeof locked === 'boolean' ? { locked } : {})
 	};
 }
 
@@ -272,7 +291,8 @@ export function cloneConfig(config: LayoutConfig): LayoutConfig {
 	const cloneTabGroupConfig = (tabGroup: TabGroupConfig): TabGroupConfig => {
 		return {
 			tabs: [...tabGroup.tabs] as [Id, ...Id[]],
-			activeTabIndex: tabGroup.activeTabIndex
+			activeTabIndex: tabGroup.activeTabIndex,
+			...(typeof tabGroup.locked === 'boolean' ? { locked: tabGroup.locked } : {})
 		};
 	};
 

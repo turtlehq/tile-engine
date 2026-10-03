@@ -33,14 +33,23 @@
 		keyboardControls,
 		formatRatio,
 		formatRatioForAria,
-		baseClass
+		baseClass,
+		onAddTab,
+		paneToolbar,
+		keepAlive,
+		tabCycleButtons,
+		onRenameTab,
+		toolbarStart,
+		toolbarEnd,
+		onCloseTab,
+		onActivate
 	}: {
 		config: NodeConfig;
 		views: SvelteMap<Id, View>;
 		tabgroupControls: Snippet<[Id]>[];
 		disableResizeSplits: boolean;
 		disableDragAndDrop: boolean;
-		onStartTabDrag: (event: DragEvent, tabGroup: TabGroupConfig, tabId: Id) => void;
+		onStartTabDrag: (event: DragEvent, tabGroup: TabGroupConfig, tabIds: Id[]) => void;
 		onHoverEnter: (tabGroup: TabGroupConfig, target: DropTarget) => void;
 		onHoverExit: (tabGroup: TabGroupConfig) => void;
 		canDrop: (tabGroup: TabGroupConfig, target: DropTarget) => boolean;
@@ -54,6 +63,15 @@
 		formatRatio: (ratio: number) => string;
 		formatRatioForAria: (ratio: number) => number;
 		baseClass: string;
+		onAddTab?: (tabGroup: TabGroupConfig) => void;
+		paneToolbar?: Snippet<[Id]>;
+		keepAlive?: boolean;
+		tabCycleButtons?: boolean;
+		onRenameTab?: (tabId: Id, title: string) => void;
+		toolbarStart?: Snippet<[Id]>;
+		toolbarEnd?: Snippet<[Id]>;
+		onCloseTab?: (viewId: Id) => void;
+		onActivate?: (tabGroup: TabGroupConfig) => void;
 	} = $props();
 </script>
 
@@ -78,6 +96,15 @@
 		{formatRatio}
 		{formatRatioForAria}
 		{baseClass}
+		{onAddTab}
+		{paneToolbar}
+		{keepAlive}
+		{tabCycleButtons}
+		{onRenameTab}
+		{toolbarStart}
+		{toolbarEnd}
+		{onCloseTab}
+		{onActivate}
 	></HorizonSplit>
 {:else}
 	<HorizonTabGroup
@@ -94,5 +121,14 @@
 		controls={tabgroupControls}
 		keyboardControls={keyboardControls.tabGroupControls ?? []}
 		baseClass={`${baseClass}-tabgroup`}
+		{onAddTab}
+		{paneToolbar}
+		{keepAlive}
+		{tabCycleButtons}
+		{onRenameTab}
+		{toolbarStart}
+		{toolbarEnd}
+		{onCloseTab}
+		{onActivate}
 	></HorizonTabGroup>
 {/if}

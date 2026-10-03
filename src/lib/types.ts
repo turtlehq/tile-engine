@@ -9,11 +9,16 @@ export type SplitDirection = 'horizontal' | 'vertical';
 // Everything HorizonLayout needs to know about a single panel's content.
 export interface View {
 	title: string;
+	// Optional icon rendered inside the tab, to the left of the title.
+	icon?: Snippet;
 	// The panel body. Rendered inside the active tab's content area.
 	snippet: Snippet;
 	// Optional controls rendered inside the tab, to the right of the title
 	// (e.g. a close button or a badge).
 	tabControls?: Snippet<[Id]>[];
+	// When false, the built-in close button is hidden even if `onCloseTab` is
+	// provided. Default true. Has no effect without `onCloseTab`.
+	closable?: boolean;
 }
 
 // A node that splits its space among two or more children.
@@ -33,6 +38,10 @@ export interface TabGroupConfig {
 
 	// Must be a valid index of the tabs array.
 	activeTabIndex: number;
+
+	// When true, the group's tabs cannot be dragged out and other tabs cannot
+	// be dropped into it. Persisted through cloneConfig/parseLayoutConfig.
+	locked?: boolean;
 }
 
 export type NodeConfig = SplitConfig | TabGroupConfig;

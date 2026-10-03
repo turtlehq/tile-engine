@@ -1,45 +1,259 @@
 :root {
-	--hl-background: oklch(0.09 0.02 264);
-	--hl-foreground: oklch(0.97 0.01 255);
-	--hl-primary: oklch(0.65 0.18 277);
-	--hl-popover: oklch(0.12 0.02 264 / 0.78);
-	--hl-border: oklch(0.28 0.05 266 / 0.55);
-	--hl-card: oklch(0.13 0.02 264 / 0.62);
-	--hl-secondary: oklch(0.22 0.03 265 / 0.55);
-	--hl-muted-foreground: oklch(0.68 0.03 255);
-	--hl-ring: oklch(0.65 0.18 277 / 0.55);
-	--hl-accent: oklch(0.22 0.05 266 / 0.65);
-	--hl-radius: 0.5rem;
+	--bg: #25292e;
+	--panel: #2f353b;
+	--frame: #5a6570;
+	--fg: #e6e9ec;
+	--muted: #8b949e;
+	--accent: #3db8ff;
+	--accent-studio: #e24b3a;
+	--pad: 6px;
+	--inset: 8px;
+	--tab-gap: 4px;
+	--tab-h: 28px;
+	--toolbar-h: 28px;
+	--radius: 3px;
+	--accent-w: 3px;
+
+	--local-accent: var(--accent);
+	--active-bg: var(--panel);
+
+	/* Namespaced Horizon Layout tokens */
+	--hl-bg: var(--bg);
+	--hl-panel: var(--panel);
+	--hl-frame: var(--frame);
+	--hl-fg: var(--fg);
+	--hl-muted: var(--muted);
+	--hl-accent: var(--accent);
+	--hl-accent-studio: var(--accent-studio);
+	--hl-pad: var(--pad);
+	--hl-inset: var(--inset);
+	--hl-tab-gap: var(--tab-gap);
+	--hl-tab-h: var(--tab-h);
+	--hl-toolbar-h: var(--toolbar-h);
+	--hl-radius: var(--radius);
+	--hl-accent-w: var(--accent-w);
+	--hl-local-accent: var(--local-accent);
+	--hl-active-bg: var(--active-bg);
+
+	/* Compatibility aliases */
+	--hl-background: var(--hl-bg);
+	--hl-foreground: var(--hl-fg);
+	--hl-primary: var(--hl-local-accent);
+	--hl-popover: color-mix(in srgb, var(--hl-panel) 85%, black);
+	--hl-border: var(--hl-frame);
+	--hl-card: var(--hl-active-bg);
+	--hl-secondary: color-mix(in srgb, var(--hl-panel) 75%, black);
+	--hl-muted-foreground: var(--hl-muted);
+	--hl-ring: var(--hl-local-accent);
 	--hl-glass-blur: 14px;
-	--hl-tab-inactive-color: oklch(0.68 0.03 255 / 0.65);
-	--hl-drop-hint-border: color-mix(in oklch, oklch(0.65 0.18 277) 80%, transparent);
-	--hl-drop-hint-bg: color-mix(in oklch, oklch(0.65 0.18 277) 12%, transparent);
+	--hl-tab-inactive-color: var(--hl-muted);
+	--hl-drop-hint-border: var(--hl-local-accent);
+	--hl-drop-hint-bg: color-mix(in srgb, var(--hl-local-accent) 20%, transparent);
+
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
+	color: var(--hl-fg);
+	background: var(--hl-bg);
 }
 
-.light {
-	--hl-background: oklch(0.96 0.01 264);
-	--hl-foreground: oklch(0.13 0.02 264);
-	--hl-primary: oklch(0.55 0.18 277);
-	--hl-popover: oklch(0.98 0.01 264 / 0.84);
-	--hl-border: oklch(0.82 0.02 264 / 0.65);
-	--hl-card: oklch(1 0 0 / 0.72);
-	--hl-secondary: oklch(0.97 0.01 264 / 0.65);
-	--hl-muted-foreground: oklch(0.42 0.04 255);
-	--hl-ring: oklch(0.55 0.18 277 / 0.55);
-	--hl-accent: oklch(0.88 0.025 264 / 0.72);
-	--hl-tab-inactive-color: oklch(0.42 0.04 255 / 0.65);
-	--hl-drop-hint-border: color-mix(in oklch, oklch(0.55 0.18 277) 80%, transparent);
-	--hl-drop-hint-bg: color-mix(in oklch, oklch(0.55 0.18 277) 12%, transparent);
+.light,
+[data-theme='light'] {
+	--bg: #e8ecf0;
+	--panel: #f3f6f9;
+	--frame: #c4cdd6;
+	--fg: #1f2328;
+	--muted: #656d76;
+	--accent: #0969da;
+	--accent-studio: #cf222e;
+
+	--hl-bg: var(--bg);
+	--hl-panel: var(--panel);
+	--hl-frame: var(--frame);
+	--hl-fg: var(--fg);
+	--hl-muted: var(--muted);
+	--hl-accent: var(--accent);
+	--hl-active-bg: var(--panel);
+	--hl-local-accent: var(--accent);
+
+	--hl-background: var(--hl-bg);
+	--hl-foreground: var(--hl-fg);
+	--hl-primary: var(--hl-local-accent);
+	--hl-popover: color-mix(in srgb, var(--hl-panel) 90%, white);
+	--hl-border: var(--hl-frame);
+	--hl-card: var(--hl-active-bg);
+	--hl-secondary: color-mix(in srgb, var(--hl-panel) 80%, black);
+	--hl-muted-foreground: var(--hl-muted);
+	--hl-ring: var(--hl-local-accent);
 }
 
+/* Studio mapping preset / theme */
+[data-theme='studio'],
+.theme-studio,
+.studio-wrap {
+	--local-accent: var(--accent-studio);
+	--panel: #141517;
+	--active-bg: #141517;
+	--frame: #3a3d44;
+	--bg: #1b1c1f;
+
+	--hl-local-accent: var(--local-accent);
+	--hl-panel: var(--panel);
+	--hl-active-bg: var(--active-bg);
+	--hl-frame: var(--frame);
+	--hl-bg: var(--bg);
+	--hl-background: var(--hl-bg);
+	--hl-border: var(--hl-frame);
+	--hl-card: var(--hl-active-bg);
+}
+
+/* ── Style Presets ── */
+
+/* Preset A: border only (no top accent bar) */
+[data-style='border'] .horizon-layout-tabgroup__tab--active,
+[data-style='border'] .tab.active,
+.hl-style--border .horizon-layout-tabgroup__tab--active,
+.hl-style--border .tab.active {
+	border-top: 1px solid var(--hl-frame) !important;
+}
+
+/* Preset B: soft fill */
+[data-style='soft'],
+.hl-style--soft {
+	--panel: #333940;
+	--hl-panel: #333940;
+}
+[data-style='soft'] .horizon-layout,
+[data-style='soft'] .nest,
+.hl-style--soft .horizon-layout,
+.hl-style--soft .nest {
+	--active-bg: #3a4249;
+	--hl-active-bg: #3a4249;
+}
+[data-style='soft']
+	.horizon-layout-tabgroup__tab:not(.horizon-layout-tabgroup__tab--active):not(
+		.horizon-layout-tabgroup__tab-add
+	),
+[data-style='soft'] .tab:not(.active):not(.add),
+.hl-style--soft
+	.horizon-layout-tabgroup__tab:not(.horizon-layout-tabgroup__tab--active):not(
+		.horizon-layout-tabgroup__tab-add
+	),
+.hl-style--soft .tab:not(.active):not(.add) {
+	background: color-mix(in srgb, var(--hl-bg) 55%, transparent);
+	border-color: color-mix(in srgb, var(--hl-frame) 40%, transparent);
+}
+[data-style='soft'] .nested .horizon-layout-tabgroup__body,
+[data-style='soft'] .nested .frame,
+[data-style='soft'] .nested .horizon-layout-tabgroup__tab--active,
+[data-style='soft'] .nested .tab.active,
+.hl-style--soft .nested .horizon-layout-tabgroup__body,
+.hl-style--soft .nested .frame,
+.hl-style--soft .nested .horizon-layout-tabgroup__tab--active,
+.hl-style--soft .nested .tab.active {
+	--active-bg: #2c3238;
+	--hl-active-bg: #2c3238;
+}
+
+/* Preset C: strong accent (active tab top border) */
+.horizon-layout-tabgroup__tab--active,
+.tab.active,
+[data-style='accent'] .horizon-layout-tabgroup__tab--active,
+[data-style='accent'] .tab.active,
+.hl-style--accent .horizon-layout-tabgroup__tab--active,
+.hl-style--accent .tab.active {
+	border-top: var(--hl-accent-w) solid var(--hl-local-accent);
+}
+
+/* Preset D: thin accent */
+[data-style='thin'] .horizon-layout-tabgroup__tab--active,
+[data-style='thin'] .tab.active,
+.hl-style--thin .horizon-layout-tabgroup__tab--active,
+.hl-style--thin .tab.active {
+	border-top: 1.5px solid var(--hl-local-accent);
+}
+
+/* ── Feature Toggles ── */
+[data-icons='off'] .horizon-layout-tabgroup__tab-icon:not(.keep),
+[data-icons='off'] .tab .ico:not(.keep),
+.hl-icons--off .horizon-layout-tabgroup__tab-icon:not(.keep),
+.hl-icons--off .tab .ico:not(.keep) {
+	display: none;
+}
+
+[data-toolbar='off'] .horizon-layout-tabgroup__toolbar,
+[data-toolbar='off'] .toolbar,
+.hl-toolbar--off .horizon-layout-tabgroup__toolbar,
+.hl-toolbar--off .toolbar {
+	display: none;
+}
+
+[data-frames='off'] .horizon-layout-tabgroup__body,
+[data-frames='off'] .frame,
+.hl-frames--off .horizon-layout-tabgroup__body,
+.hl-frames--off .frame {
+	border-color: transparent !important;
+}
+
+[data-add='off'] .horizon-layout-tabgroup__tab-add,
+[data-add='off'] .tab.add,
+.hl-add--off .horizon-layout-tabgroup__tab-add,
+.hl-add--off .tab.add {
+	display: none;
+}
+
+[data-inset='off'] .nested,
+[data-inset='off'] .horizon-layout--nested,
+.hl-inset--off .nested,
+.hl-inset--off .horizon-layout--nested {
+	margin-left: 0 !important;
+}
+
+/* ── Root Layout Container ── */
 .horizon-layout {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	background: var(--hl-background);
-	font-family: system-ui, sans-serif;
-	font-size: 0.8125rem;
-	color: var(--hl-foreground);
+	background: var(--hl-bg);
+	font-family: inherit;
+	font-size: 0.8rem;
+	color: var(--hl-fg);
+	box-sizing: border-box;
+}
+
+.horizon-layout * {
+	box-sizing: border-box;
+}
+
+/* ── Surface variants ──
+   `flush` (default) fuses tabs to the pane body. `card` detaches each pane as
+   a rounded card. `inset` recesses the whole layout into a darker well. */
+.horizon-layout[data-surface='card'] {
+	padding: var(--hl-pad);
+}
+
+.horizon-layout[data-surface='card'] .horizon-layout-tabgroup__body {
+	border-radius: var(--hl-radius);
+	box-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
+}
+
+.horizon-layout[data-surface='card'] .horizon-layout-tabgroup__tab--active {
+	border-radius: var(--hl-radius) var(--hl-radius) 0 0;
+}
+
+.horizon-layout[data-surface='inset'] {
+	padding: calc(var(--hl-pad) / 2);
+	background: color-mix(in srgb, var(--hl-bg) 70%, black);
+}
+
+.horizon-layout[data-surface='inset'] .horizon-layout-tabgroup__body {
+	border-radius: var(--hl-radius);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hl-frame) 55%, transparent);
 }
 
 .horizon-layout__content {
@@ -52,6 +266,540 @@
 	animation: hl-fade-in 80ms ease;
 }
 
+/* Maximized frame container */
+.horizon-layout__maximized-frame {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	box-sizing: border-box;
+	border: 1px solid var(--hl-frame);
+	background: var(--hl-active-bg);
+	animation: hl-fade-in 80ms ease;
+}
+
+.horizon-layout__toolbar--maximized {
+	display: flex;
+	align-items: center;
+	gap: var(--hl-pad);
+	height: var(--hl-toolbar-h);
+	min-height: var(--hl-toolbar-h);
+	padding: 0 var(--hl-pad);
+	background: var(--hl-active-bg);
+	border-bottom: 1px solid color-mix(in srgb, var(--hl-frame) 55%, transparent);
+	color: var(--hl-muted);
+	font-size: 0.72rem;
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.horizon-layout__maximized-exit {
+	margin-left: auto;
+	appearance: none;
+	-webkit-appearance: none;
+	background: color-mix(in srgb, var(--hl-frame) 30%, transparent);
+	border: 1px solid color-mix(in srgb, var(--hl-frame) 60%, transparent);
+	border-radius: var(--hl-radius);
+	color: var(--hl-fg);
+	font: inherit;
+	font-size: 0.72rem;
+	font-weight: 500;
+	padding: 2px 7px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	transition:
+		background 60ms ease,
+		color 60ms ease,
+		border-color 60ms ease;
+}
+
+.horizon-layout__maximized-exit:hover {
+	background: color-mix(in srgb, var(--hl-local-accent) 20%, transparent);
+	border-color: var(--hl-local-accent);
+	color: var(--hl-fg);
+}
+
+/* ── Nested Inset & Stepping Darker ── */
+.nested,
+.horizon-layout--nested,
+.horizon-layout .horizon-layout {
+	margin-left: var(--hl-inset);
+	--active-bg: color-mix(in srgb, var(--hl-panel) 72%, black);
+	--hl-active-bg: var(--active-bg);
+}
+
+[data-theme='studio'] .nested,
+[data-theme='studio'] .horizon-layout--nested,
+[data-theme='studio'] .horizon-layout .horizon-layout,
+.theme-studio .nested,
+.theme-studio .horizon-layout--nested,
+.theme-studio .horizon-layout .horizon-layout,
+.studio-wrap .nested,
+.studio-wrap .horizon-layout--nested,
+.studio-wrap .horizon-layout .horizon-layout {
+	--active-bg: #0f1011;
+	--hl-active-bg: #0f1011;
+}
+
+.light .nested,
+.light .horizon-layout--nested,
+.light .horizon-layout .horizon-layout,
+[data-theme='light'] .nested,
+[data-theme='light'] .horizon-layout--nested,
+[data-theme='light'] .horizon-layout .horizon-layout {
+	--active-bg: color-mix(in srgb, var(--hl-panel) 92%, black);
+	--hl-active-bg: var(--active-bg);
+}
+
+/* ── Tab Group ── */
+.horizon-layout-tabgroup {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	box-sizing: border-box;
+	background: transparent;
+	border: none;
+	font-size: 0.8rem;
+}
+
+/* Tab bar container (sits directly above frame body and overlaps top frame border by 1px) */
+.horizon-layout-tabgroup__tab-bar,
+.tabrow {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: var(--hl-tab-gap);
+	min-height: calc(var(--hl-tab-h) + 1px);
+	height: calc(var(--hl-tab-h) + 1px);
+	margin-bottom: -1px;
+	padding: 0 var(--hl-pad) 0 0;
+	background: transparent;
+	border-bottom: none;
+	flex-shrink: 0;
+}
+
+.horizon-layout-tabgroup__tabs {
+	display: flex;
+	align-items: flex-end;
+	gap: var(--hl-tab-gap);
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: calc(var(--hl-tab-h) + 1px);
+	height: calc(var(--hl-tab-h) + 1px);
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	outline: none;
+}
+
+.horizon-layout-tabgroup__tabs::-webkit-scrollbar {
+	display: none;
+}
+
+/* Individual tab button */
+.horizon-layout-tabgroup__tab,
+.tab {
+	appearance: none;
+	-webkit-appearance: none;
+	position: relative;
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 5px;
+	height: var(--hl-tab-h);
+	padding: 0 var(--hl-pad);
+	margin-bottom: 1px;
+	font: inherit;
+	font-size: 0.78rem;
+	color: var(--hl-muted);
+	background: transparent;
+	border: 1px solid transparent;
+	border-bottom: none;
+	border-radius: var(--hl-radius) var(--hl-radius) 0 0;
+	cursor: pointer;
+	white-space: nowrap;
+	user-select: none;
+	touch-action: none;
+	outline: none;
+	box-sizing: border-box;
+	transition:
+		color 60ms ease,
+		background 60ms ease,
+		border-color 60ms ease;
+}
+
+.horizon-layout-tabgroup__tab:hover,
+.tab:hover {
+	color: color-mix(in srgb, var(--hl-fg) 80%, var(--hl-muted));
+}
+
+.horizon-layout-tabgroup__tab:focus-visible,
+.tab:focus-visible {
+	outline: 1px solid var(--hl-local-accent);
+	outline-offset: 1px;
+}
+
+/* Active tab: matches frame background and seamlessly merges into frame border & toolbar */
+.horizon-layout-tabgroup__tab--active,
+.tab.active {
+	z-index: 3;
+	color: var(--hl-fg);
+	background: var(--hl-active-bg);
+	border: 1px solid var(--hl-frame);
+	border-bottom: none;
+	height: calc(var(--hl-tab-h) + 1px);
+	margin-bottom: 0;
+	font-weight: 500;
+}
+
+/* Seamless bridge under active tab: covers frame/toolbar top border completely */
+.horizon-layout-tabgroup__tab--active::after,
+.tab.active::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	background: var(--hl-active-bg);
+	pointer-events: none;
+	z-index: 4;
+}
+
+.horizon-layout-tabgroup__tab-icon,
+.tab .ico {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
+	opacity: 0.75;
+}
+
+.horizon-layout-tabgroup__tab-icon svg,
+.tab .ico svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.horizon-layout-tabgroup__tab--active .horizon-layout-tabgroup__tab-icon,
+.tab.active .ico {
+	opacity: 1;
+}
+
+.horizon-layout-tabgroup__tab-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	letter-spacing: 0.01em;
+}
+
+.horizon-layout-tabgroup__tab-controls {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.horizon-layout-tabgroup__tab-control {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Tab Add button (+) — always borderless per design */
+.horizon-layout-tabgroup__tab-add,
+.tab.add {
+	appearance: none;
+	-webkit-appearance: none;
+	width: var(--hl-tab-h);
+	height: var(--hl-tab-h);
+	padding: 0;
+	margin-bottom: 1px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none !important;
+	background: transparent !important;
+	color: var(--hl-muted);
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: color 60ms ease;
+}
+
+.horizon-layout-tabgroup__tab-add:hover,
+.tab.add:hover {
+	color: var(--hl-fg);
+}
+
+.horizon-layout-tabgroup__tab-add-icon {
+	width: 12px;
+	height: 12px;
+	display: block;
+}
+
+/* Group drag handle: the empty fill between tabs and controls. */
+.horizon-layout-tabgroup__tab-bar-drag {
+	flex: 1 1 auto;
+	align-self: stretch;
+	min-width: 1.5rem;
+	min-height: 100%;
+	cursor: grab;
+	touch-action: none;
+}
+
+.horizon-layout-tabgroup__tab-bar-drag:active {
+	cursor: grabbing;
+}
+
+/* Tab cycle buttons (prev / next) */
+.horizon-layout-tabgroup__tab-cycle {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.horizon-layout-tabgroup__tab-cycle-btn {
+	appearance: none;
+	-webkit-appearance: none;
+	width: calc(var(--hl-tab-h) * 0.75);
+	height: var(--hl-tab-h);
+	padding: 0;
+	margin-bottom: 1px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	background: transparent;
+	color: var(--hl-muted);
+	cursor: pointer;
+	transition: color 60ms ease;
+}
+
+.horizon-layout-tabgroup__tab-cycle-btn:hover:not(:disabled) {
+	color: var(--hl-fg);
+}
+
+.horizon-layout-tabgroup__tab-cycle-btn:disabled,
+.horizon-layout-tabgroup__tab-cycle-btn--at-edge {
+	opacity: 0.35;
+	cursor: default;
+}
+
+.horizon-layout-tabgroup__tab-cycle-icon {
+	width: 14px;
+	height: 14px;
+	display: block;
+}
+
+/* Inline tab rename input */
+.horizon-layout-tabgroup__tab-rename {
+	appearance: none;
+	-webkit-appearance: none;
+	font: inherit;
+	font-size: 0.78rem;
+	color: var(--hl-fg);
+	background: color-mix(in srgb, var(--hl-bg) 60%, transparent);
+	border: 1px solid var(--hl-local-accent);
+	border-radius: var(--hl-radius);
+	padding: 1px 4px;
+	min-width: 3rem;
+	max-width: 12rem;
+	outline: none;
+}
+
+/* Keep-alive: inactive visited tabs stay mounted but hidden. */
+.horizon-layout-tabgroup__content--hidden {
+	display: none !important;
+}
+
+/* Tab group controls on right edge of tab bar */
+.horizon-layout-tabgroup__controls {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-shrink: 0;
+	margin-left: auto;
+	padding-left: 4px;
+	margin-bottom: 1px;
+}
+
+.horizon-layout-tabgroup__control {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ── Frame Body ── */
+.horizon-layout-tabgroup__body,
+.frame {
+	position: relative;
+	flex: 1;
+	min-height: 100px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--hl-frame);
+	background: var(--hl-active-bg);
+}
+
+.frame-body {
+	padding: var(--hl-pad);
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+
+.horizon-layout-tabgroup__content {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background: var(--hl-active-bg);
+	padding: 0;
+}
+
+/* ── Toolbar ── */
+/* Sits under tabs at top of the frame and shares the active-tab background */
+.horizon-layout-tabgroup__toolbar,
+.horizon-layout-toolbar,
+.toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--hl-pad);
+	height: var(--hl-toolbar-h);
+	min-height: var(--hl-toolbar-h);
+	padding: 0 var(--hl-pad);
+	background: var(--hl-active-bg);
+	border-bottom: 1px solid color-mix(in srgb, var(--hl-frame) 55%, transparent);
+	color: var(--hl-muted);
+	font-size: 0.72rem;
+	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+.horizon-layout-tabgroup__toolbar .tool,
+.horizon-layout-toolbar .tool,
+.toolbar .tool {
+	appearance: none;
+	background: transparent;
+	border: none;
+	color: inherit;
+	padding: 2px 4px;
+	border-radius: 3px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font: inherit;
+	font-size: 0.72rem;
+	transition:
+		color 60ms ease,
+		background 60ms ease;
+}
+
+.horizon-layout-tabgroup__toolbar .tool:hover,
+.horizon-layout-toolbar .tool:hover,
+.toolbar .tool:hover {
+	color: var(--hl-fg);
+	background: color-mix(in srgb, var(--hl-fg) 8%, transparent);
+}
+
+.horizon-layout-tabgroup__toolbar .tool .ico,
+.horizon-layout-toolbar .tool .ico,
+.toolbar .tool .ico {
+	width: 12px;
+	height: 12px;
+}
+
+.horizon-layout-tabgroup__toolbar .spacer,
+.horizon-layout-toolbar .spacer,
+.toolbar .spacer {
+	flex: 1;
+}
+
+/* Structured toolbar slots: start (left), freeform main, end (right). */
+.horizon-layout-tabgroup__toolbar-start,
+.horizon-layout-tabgroup__toolbar-main,
+.horizon-layout-tabgroup__toolbar-end {
+	display: flex;
+	align-items: center;
+	gap: var(--hl-pad);
+	min-width: 0;
+}
+
+.horizon-layout-tabgroup__toolbar-main {
+	flex: 1;
+}
+
+.horizon-layout-tabgroup__toolbar-end {
+	margin-left: auto;
+}
+
+/* First-class per-tab close button (rendered with `onCloseTab`). */
+.horizon-layout-tabgroup__tab-close {
+	appearance: none;
+	-webkit-appearance: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	padding: 0;
+	margin-left: 2px;
+	border: none;
+	border-radius: 3px;
+	background: transparent;
+	color: var(--hl-muted);
+	cursor: pointer;
+	flex-shrink: 0;
+	opacity: 0;
+	transition:
+		opacity 60ms ease,
+		color 60ms ease,
+		background 60ms ease;
+}
+
+.horizon-layout-tabgroup__tab:hover .horizon-layout-tabgroup__tab-close,
+.horizon-layout-tabgroup__tab--active .horizon-layout-tabgroup__tab-close {
+	opacity: 1;
+}
+
+.horizon-layout-tabgroup__tab-close:hover {
+	color: var(--hl-fg);
+	background: color-mix(in srgb, var(--hl-fg) 12%, transparent);
+}
+
+.horizon-layout-tabgroup__tab-close svg {
+	display: block;
+}
+
+.leaf {
+	color: var(--hl-muted);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.72rem;
+	line-height: 1.5;
+	padding: 2px 0;
+	min-height: 2.75rem;
+}
+
+/* ── Split System ── */
 .horizon-layout-split {
 	position: relative;
 	width: 100%;
@@ -80,7 +828,7 @@
 .horizon-layout-split__resizer {
 	flex: 0 0 0px;
 	position: relative;
-	z-index: 1;
+	z-index: 10;
 }
 
 .horizon-layout-split__resizer--horizontal {
@@ -124,7 +872,7 @@
 	left: 50%;
 	transform: translate(-50%, -50%);
 	border-radius: 100vmax;
-	background: var(--hl-primary);
+	background: var(--hl-local-accent);
 	opacity: 0;
 	transition: opacity 100ms ease;
 }
@@ -152,17 +900,17 @@
 .horizon-layout-split__ratio {
 	position: absolute;
 	padding: 2px 7px;
-	border-radius: 0.25rem;
+	border-radius: var(--hl-radius);
 	background: var(--hl-popover);
 	border: 1px solid var(--hl-border);
-	color: var(--hl-primary);
+	color: var(--hl-local-accent);
 	font-size: 0.7rem;
 	font-variant-numeric: tabular-nums;
 	pointer-events: none;
 	opacity: 0;
 	transition: opacity 60ms linear;
 	white-space: nowrap;
-	z-index: 3;
+	z-index: 20;
 	backdrop-filter: blur(var(--hl-glass-blur));
 }
 
@@ -180,135 +928,11 @@
 	opacity: 1;
 }
 
-.horizon-layout-tabgroup {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	height: 100%;
-	min-width: 0;
-	min-height: 0;
-	overflow: hidden;
-	box-sizing: border-box;
-	border: 1px solid var(--hl-border);
-	background: var(--hl-card);
-}
-
-.horizon-layout-tabgroup__tab-bar {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	align-items: stretch;
-	justify-content: space-between;
-	padding-right: 4px;
-	background: var(--hl-background);
-	border-bottom: 1px solid var(--hl-border);
-	min-height: 32px;
-	flex-shrink: 0;
-}
-
-.horizon-layout-tabgroup__tabs {
-	display: flex;
-	align-items: stretch;
-	flex: 1 1 auto;
-	min-width: 0;
-	overflow-x: auto;
-	overflow-y: hidden;
-	scrollbar-width: none;
-	outline: none;
-}
-
-.horizon-layout-tabgroup__tab {
-	position: relative;
-	display: inline-flex;
-	flex: 0 0 auto;
-	align-items: center;
-	gap: 0.35rem;
-	min-height: 32px;
-	max-width: 13rem;
-	padding: 0 0.65rem;
-	margin-top: 4px;
-	margin-bottom: 4px;
-	background: transparent;
-	border-radius: var(--hl-radius);
-	color: var(--hl-tab-inactive-color);
-	user-select: none;
-	touch-action: none;
-	outline: none;
-	transition:
-		color 60ms ease,
-		background 60ms ease;
-}
-
-.horizon-layout-tabgroup__tab:hover {
-	color: var(--hl-muted-foreground);
-	background: color-mix(in oklch, var(--hl-muted-foreground) 8%, transparent);
-}
-
-.horizon-layout-tabgroup__tab--active {
-	background: var(--hl-secondary);
-	color: var(--hl-foreground);
-	font-weight: 500;
-}
-
-.light .horizon-layout-tabgroup__tab--active {
-	background: color-mix(in oklch, var(--hl-border) 40%, transparent);
-}
-
-.light .horizon-layout-tabgroup__tab:hover {
-	background: color-mix(in oklch, var(--hl-border) 18%, transparent);
-}
-
-.horizon-layout-tabgroup__tab-active-fill {
-	position: absolute;
-	bottom: -1px;
-	left: 0;
-	right: 0;
-	height: 1px;
-	background: var(--hl-secondary);
-	pointer-events: none;
-}
-
-.horizon-layout-tabgroup__tabs:focus-visible .horizon-layout-tabgroup__tab--active {
-	outline: 2px solid var(--hl-ring);
-	outline-offset: -2px;
-	border-radius: 4px;
-	background: var(--hl-accent);
-	color: var(--hl-foreground);
-}
-
-.horizon-layout-tabgroup__tabs:focus-visible
-	.horizon-layout-tabgroup__tab--active
-	.horizon-layout-tabgroup__tab-active-fill {
-	background: var(--hl-accent);
-}
-
-.horizon-layout-tabgroup__tab-title {
-	flex: 1 1 auto;
-	min-width: 0;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-size: 0.74rem;
-	letter-spacing: 0.01em;
-}
-
-.horizon-layout-tabgroup__tab-controls {
-	display: inline-flex;
-	align-items: center;
-	gap: 2px;
-	flex-shrink: 0;
-}
-
-.horizon-layout-tabgroup__tab-control {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-
+/* ── Drag & Drop Hints and Zones ── */
 .horizon-layout-tabgroup__tab-drop-hint {
 	flex: 0 0 2px;
 	align-self: stretch;
+	margin-bottom: 1px;
 	border-radius: 2px;
 	background: transparent;
 	transition: background 40ms ease;
@@ -317,12 +941,13 @@
 }
 
 .horizon-layout-tabgroup__tab-drop-hint--hover {
-	background: var(--hl-primary);
+	background: var(--hl-local-accent);
 }
 
 .horizon-layout-tabgroup__tab-drop-zone {
 	flex: 0 0 0px;
 	align-self: stretch;
+	margin-bottom: 1px;
 	position: relative;
 	pointer-events: none;
 	z-index: 3;
@@ -344,39 +969,11 @@
 
 .horizon-layout-tabgroup__tab-drop-zone--end {
 	flex: 1 1 auto;
-	min-width: 48px;
+	min-width: 32px;
 }
 
 .horizon-layout-tabgroup__tab-drop-zone--end::before {
 	inset: 0;
-}
-
-.horizon-layout-tabgroup__controls {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	flex-shrink: 0;
-	padding-left: 4px;
-}
-
-.horizon-layout-tabgroup__control {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.horizon-layout-tabgroup__body {
-	position: relative;
-	flex: 1;
-	min-height: 0;
-	overflow: hidden;
-}
-
-.horizon-layout-tabgroup__content {
-	width: 100%;
-	height: 100%;
-	overflow: auto;
-	background: var(--hl-card);
 }
 
 .horizon-layout-tabgroup__drop-zones {
@@ -433,13 +1030,14 @@
 	inset: 2px 50% 2px 2px;
 }
 
+/* ── Popout Window ── */
 .horizon-layout__popout {
 	width: 100vw;
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
-	background: var(--hl-background);
-	color: var(--hl-foreground);
+	background: var(--hl-bg);
+	color: var(--hl-fg);
 	font-size: 0.8125rem;
 }
 

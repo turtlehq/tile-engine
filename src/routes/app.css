@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-background: var(--bg);
+	--color-foreground: var(--fg);
+	--color-card: var(--panel);
+	--color-card-foreground: var(--fg);
+	--color-popover: var(--panel);
+	--color-popover-foreground: var(--fg);
+	--color-primary: var(--hl-local-accent);
+	--color-primary-foreground: #ffffff;
+	--color-secondary: color-mix(in srgb, var(--panel) 70%, black);
+	--color-secondary-foreground: var(--fg);
+	--color-muted: color-mix(in srgb, var(--panel) 60%, transparent);
+	--color-muted-foreground: var(--muted);
+	--color-accent: color-mix(in srgb, var(--hl-local-accent) 15%, transparent);
+	--color-accent-foreground: var(--fg);
+	--color-destructive: #e24b3a;
+	--color-destructive-foreground: #ffffff;
+	--color-border: var(--frame);
+	--color-input: color-mix(in srgb, var(--frame) 50%, transparent);
+	--color-ring: var(--hl-local-accent);
+	--radius-lg: 8px;
+	--radius-md: 6px;
+	--radius-sm: 4px;
+}

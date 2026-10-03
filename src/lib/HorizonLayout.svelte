@@ -21,6 +21,7 @@
 		cloneConfig,
 		validateConfig
 	} from './utils.ts';
+	import { findFirstTabGroup, findTabGroupForViewId } from './operations.ts';
 	import { DEFAULT_MIN_WIDTH_RATIO, DEFAULT_MIN_HEIGHT_RATIO } from './internal-utils.ts';
 	import { dropTargetType } from './internal-utils.ts';
 	import type { DropTarget } from './internal-types.ts';
@@ -36,7 +37,9 @@
 	// State held for the duration of a drag operation.
 	type DragData = {
 		configBeforeDrag: LayoutConfig;
-		tabId: Id;
+		// One id for a single-tab drag, or the whole group's tabs for a bar drag.
+		tabIds: Id[];
+		activeTabId: Id;
 		// The tab group and drop target currently being hovered over, or null.
 		hover: { tabGroup: TabGroupConfig; target: DropTarget } | null;
 	};
@@ -231,7 +234,18 @@
 		onPopoutClose,
 		onPopoutBlocked,
 		baseClass = 'horizon-layout',
-		skipValidation = false
+		skipValidation = false,
+		onAddTab,
+		paneToolbar,
+		keepAlive = false,
+		tabCycleButtons = false,
+		onRenameTab,
+		toolbarStart,
+		toolbarEnd,
+		onCloseTab,
+		surface = 'flush',
+		activeView = $bindable(undefined),
+		onActiveViewChange
 	}: {
 		/** The layout configuration. Bind this to keep it in sync with user interactions. */
 		config: LayoutConfig;
@@ -274,6 +288,28 @@
 		 * the redundant check.
 		 */
 		skipValidation?: boolean;
+		/** Optional callback invoked when user clicks the '+' add tab button in a tab group. */
+		onAddTab?: (tabGroup: TabGroupConfig) => void;
+		/** Optional snippet rendered as a pane toolbar at the top of active tab content. */
+		paneToolbar?: Snippet<[Id]>;
+		/** Keep visited tabs mounted (hidden) so their state survives switches. */
+		keepAlive?: boolean;
+		/** Show prev/next cycle buttons on tab groups with more than one tab. */
+		tabCycleButtons?: boolean;
+		/** Called with the committed title when a tab is renamed inline. */
+		onRenameTab?: (tabId: Id, title: string) => void;
+		/** Content rendered at the start (left) of every pane toolbar. */
+		toolbarStart?: Snippet<[Id]>;
+		/** Content rendered at the end (right) of every pane toolbar. */
+		toolbarEnd?: Snippet<[Id]>;
+		/** When provided, each tab gets a built-in close button. */
+		onCloseTab?: (viewId: Id) => void;
+		/** Chrome surface style. Default: 'flush' (tabs fused to the pane body). */
+		surface?: 'flush' | 'card' | 'inset';
+		/** The active pane's view id. Updated on hover/focus and tab changes. */
+		activeView?: Id;
+		/** Called when the active pane changes. */
+		onActiveViewChange?: (viewId: Id) => void;
 	} = $props();
 
 	// The layout operates on a validated internal copy so that invalid external
@@ -282,6 +318,42 @@
 	// without affecting the external config until the drag is complete.
 	let internalConfig = $state<LayoutConfig | null>(null);
 	let dragData = $state<DragData | null>(null);
+
+	// ── Active pane model ──
+	// The active pane is the tab group under the pointer (hover) or keyboard
+	// focus. Its active tab is the target for the action catalog / layout handle,
+	// so consumers never re-implement focus tracking.
+	function activateGroup(tabGroup: TabGroupConfig) {
+		const next = tabGroup.tabs[tabGroup.activeTabIndex];
+		if (next && next !== activeView) {
+			activeView = next;
+			onActiveViewChange?.(next);
+		}
+	}
+
+	// Keep `activeView` pointing at a live tab: seed it on first render, follow
+	// the active group as its active tab changes, and ignore removed views.
+	$effect(() => {
+		void internalConfig;
+		const root = internalConfig?.root;
+		if (!root) return;
+		if (!activeView) {
+			const first = findFirstTabGroup(root);
+			const next = first.tabs[first.activeTabIndex];
+			if (next) {
+				activeView = next;
+				onActiveViewChange?.(next);
+			}
+			return;
+		}
+		const group = findTabGroupForViewId(root, activeView);
+		if (!group) return;
+		const next = group.tabs[group.activeTabIndex];
+		if (next && next !== activeView) {
+			activeView = next;
+			onActiveViewChange?.(next);
+		}
+	});
 
 	// Precomputed map from every NodeConfig to its parent split + child index.
 	// Rebuilt whenever internalConfig changes.
@@ -465,6 +537,7 @@
 	}
 
 	function canDrop(tabGroup: TabGroupConfig, target: DropTarget) {
+		if (tabGroup.locked) return false;
 		if (dropTargetType(target) === 'tab') return true;
 		return canSplitTabGroup(
 			tabGroup,
@@ -521,12 +594,17 @@
 		if (dragData?.hover?.tabGroup === tabGroup) dragData.hover = null;
 	}
 
-	function onStartTabDrag(event: DragEvent, tabGroup: TabGroupConfig, tabId: Id) {
+	function onStartTabDrag(event: DragEvent, tabGroup: TabGroupConfig, tabIds: Id[]) {
 		if (dragData) return;
+		if (tabIds.length === 0) return;
 
-		const tabIndex = tabGroup.tabs.indexOf(tabId);
-		if (tabIndex === -1) return;
-		const activeTabIndex = tabGroup.activeTabIndex;
+		const activeTabId = tabGroup.tabs[tabGroup.activeTabIndex] ?? tabIds[0]!;
+		const removeIndices = tabIds
+			.map((id) => tabGroup.tabs.indexOf(id))
+			.filter((index) => index !== -1)
+			.sort((a, b) => b - a);
+
+		if (removeIndices.length === 0) return;
 
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
@@ -546,18 +624,12 @@
 		requestAnimationFrame(() => {
 			dragData = {
 				configBeforeDrag: cloneConfig(internalConfig!),
-				tabId,
+				tabIds: [...tabIds],
+				activeTabId,
 				hover: null
 			};
-			tabGroup.tabs.splice(tabIndex, 1);
-			if (tabGroup.tabs.length > 0) {
-				if (activeTabIndex === tabIndex) {
-					tabGroup.activeTabIndex = Math.min(tabIndex, tabGroup.tabs.length - 1);
-				} else if (activeTabIndex > tabIndex) {
-					tabGroup.activeTabIndex = activeTabIndex - 1;
-				} else {
-					tabGroup.activeTabIndex = activeTabIndex;
-				}
+			for (const index of removeIndices) {
+				tabGroup.tabs.splice(index, 1);
 			}
 			simplifyTabGroup(tabGroup, nodeParentMap, internalConfig!);
 			if (dragData) dragData.hover = null;
@@ -567,37 +639,35 @@
 	function onDrop() {
 		if (!dragData) return;
 
-		const { tabId, configBeforeDrag, hover } = dragData;
+		const { tabIds, activeTabId, configBeforeDrag, hover } = dragData;
 		dragData = null;
 
-		if (hover) {
+		if (hover && !hover.tabGroup.locked) {
 			const { tabGroup, target } = hover;
+			const activeTabIndex = Math.max(0, tabIds.indexOf(activeTabId));
+			const movedTabs = tabIds as [Id, ...Id[]];
 
 			if (target.tabIndex !== undefined) {
-				let insertIndex = Math.min(Math.max(target.tabIndex, 0), tabGroup.tabs.length);
-				tabGroup.tabs.splice(insertIndex, 0, tabId);
-				tabGroup.activeTabIndex = insertIndex;
+				const insertIndex = Math.min(Math.max(target.tabIndex, 0), tabGroup.tabs.length);
+				tabGroup.tabs.splice(insertIndex, 0, ...tabIds);
+				tabGroup.activeTabIndex = insertIndex + activeTabIndex;
 			} else {
 				const { side } = target;
 				const splitDirection = side === 'left' || side === 'right' ? 'horizontal' : 'vertical';
 				const isAfter = side === 'right' || side === 'bottom';
+				const movedTabGroup: TabGroupConfig = { tabs: movedTabs, activeTabIndex };
 
 				const parent = nodeParentMap.get(tabGroup);
 				if (parent) {
 					if (parent.parent.direction === splitDirection) {
 						const insertIndex = parent.index + (isAfter ? 1 : 0);
-						parent.parent.views.splice(insertIndex, 0, {
-							tabs: [tabId],
-							activeTabIndex: 0
-						});
+						parent.parent.views.splice(insertIndex, 0, movedTabGroup);
 						// Split the target pane in half
 						parent.parent.splitPoints.splice(parent.index, 0, paneMidpoint(parent));
 					} else {
 						const newSplit: SplitConfig = {
 							direction: splitDirection,
-							views: isAfter
-								? [tabGroup, { tabs: [tabId], activeTabIndex: 0 }]
-								: [{ tabs: [tabId], activeTabIndex: 0 }, tabGroup],
+							views: isAfter ? [tabGroup, movedTabGroup] : [movedTabGroup, tabGroup],
 							splitPoints: [0.5]
 						};
 						parent.parent.views[parent.index] = newSplit;
@@ -605,9 +675,7 @@
 				} else {
 					internalConfig!.root = {
 						direction: splitDirection,
-						views: isAfter
-							? [tabGroup, { tabs: [tabId], activeTabIndex: 0 }]
-							: [{ tabs: [tabId], activeTabIndex: 0 }, tabGroup],
+						views: isAfter ? [tabGroup, movedTabGroup] : [movedTabGroup, tabGroup],
 						splitPoints: [0.5]
 					};
 				}
@@ -760,14 +828,72 @@
 		popoutWindow.addEventListener('pagehide', handleClose);
 		popoutWindow.addEventListener('beforeunload', handleClose);
 	}
+
+	function exitMaximized() {
+		if (!internalConfig?.maximizedView) return;
+		const next = cloneConfig(internalConfig);
+		delete next.maximizedView;
+		internalConfig = next;
+		config = cloneConfig(next);
+	}
+
+	function handleWindowKeyDown(event: KeyboardEvent) {
+		if (event.defaultPrevented) return;
+		if (event.key === 'Escape' && internalConfig?.maximizedView) {
+			event.preventDefault();
+			exitMaximized();
+		}
+	}
 </script>
 
-<div class={baseClass}>
+<svelte:window onkeydown={handleWindowKeyDown} />
+
+<div class={baseClass} data-surface={surface}>
 	{#if internalConfig}
 		{#if internalConfig.maximizedView}
 			{@const view = views.get(internalConfig.maximizedView)}
-			<div class="{baseClass}__content {baseClass}__content--maximized" aria-label={view?.title}>
-				{@render view?.snippet()}
+			<div
+				class="{baseClass}__maximized-frame {baseClass}__content--maximized"
+				aria-label={view?.title}
+			>
+				<div class="{baseClass}__toolbar {baseClass}__toolbar--maximized">
+					{#if paneToolbar}
+						{@render paneToolbar(internalConfig.maximizedView)}
+					{:else}
+						{#if view?.icon}
+							<span class="{baseClass}__tab-icon" aria-hidden="true">
+								{@render view.icon()}
+							</span>
+						{/if}
+						<span class="{baseClass}__tab-title">{view?.title ?? internalConfig.maximizedView}</span
+						>
+					{/if}
+					<button
+						type="button"
+						class="{baseClass}__maximized-exit"
+						onclick={exitMaximized}
+						title="Exit fullscreen (Esc)"
+						aria-label="Exit fullscreen"
+					>
+						<svg
+							viewBox="0 0 24 24"
+							width="12"
+							height="12"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7" />
+						</svg>
+						<span>Exit fullscreen</span>
+					</button>
+				</div>
+				<div class="{baseClass}__content">
+					{@render view?.snippet()}
+				</div>
 			</div>
 		{:else if internalConfig.root}
 			<div class="{baseClass}__content">
@@ -791,6 +917,15 @@
 					{formatRatio}
 					{formatRatioForAria}
 					{baseClass}
+					{onAddTab}
+					{paneToolbar}
+					{keepAlive}
+					{tabCycleButtons}
+					{onRenameTab}
+					{toolbarStart}
+					{toolbarEnd}
+					{onCloseTab}
+					onActivate={activateGroup}
 				></HorizonLayoutNode>
 			</div>
 		{/if}

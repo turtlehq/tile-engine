@@ -25,7 +25,16 @@
 		keyboardControls,
 		formatRatio,
 		formatRatioForAria,
-		baseClass
+		baseClass,
+		onAddTab,
+		paneToolbar,
+		keepAlive,
+		tabCycleButtons,
+		onRenameTab,
+		toolbarStart,
+		toolbarEnd,
+		onCloseTab,
+		onActivate
 	}: {
 		config: SplitConfig;
 		views: SvelteMap<Id, View>;
@@ -33,7 +42,7 @@
 		disableResizeSplits: boolean;
 		disableDragAndDrop: boolean;
 		isDragging: boolean;
-		onStartTabDrag: (event: DragEvent, tabGroup: TabGroupConfig, tabId: Id) => void;
+		onStartTabDrag: (event: DragEvent, tabGroup: TabGroupConfig, tabIds: Id[]) => void;
 		onHoverEnter: (tabGroup: TabGroupConfig, target: DropTarget) => void;
 		onHoverExit: (tabGroup: TabGroupConfig) => void;
 		canDrop: (tabGroup: TabGroupConfig, target: DropTarget) => boolean;
@@ -46,6 +55,15 @@
 		formatRatio: (ratio: number) => string;
 		formatRatioForAria: (ratio: number) => number;
 		baseClass: string;
+		onAddTab?: (tabGroup: TabGroupConfig) => void;
+		paneToolbar?: Snippet<[Id]>;
+		keepAlive?: boolean;
+		tabCycleButtons?: boolean;
+		onRenameTab?: (tabId: Id, title: string) => void;
+		toolbarStart?: Snippet<[Id]>;
+		toolbarEnd?: Snippet<[Id]>;
+		onCloseTab?: (viewId: Id) => void;
+		onActivate?: (tabGroup: TabGroupConfig) => void;
 	} = $props();
 
 	let splitContainer = $state<HTMLElement | null>(null);
@@ -104,6 +122,15 @@
 		target.addEventListener('pointercancel', stop);
 	}
 
+	function equalizeAdjacentPanes(index: number) {
+		if (disableResizeSplits) return;
+		const { min, max } = posConstraints[index]!;
+		const midpoint =
+			((config.splitPoints[index - 1] ?? 0) + (config.splitPoints[index + 1] ?? 1)) / 2;
+		const clamped = Number(Math.min(Math.max(midpoint, min), max).toFixed(4));
+		if (clamped !== config.splitPoints[index]) config.splitPoints[index] = clamped;
+	}
+
 	function handleKeyDown(event: KeyboardEvent, index: number) {
 		const modifier = getModifier(event);
 		for (const control of keyboardControls.splitControls ?? []) {
@@ -129,6 +156,8 @@
 		<div
 			class="{baseClass}-split__pane {baseClass}-split__pane--{config.direction}"
 			style={`flex: ${(splitPoint ?? 1) - (config.splitPoints[i - 1] ?? 0)} 1 0 !important;`}
+			data-hl-pane-first={i === 0 ? '' : undefined}
+			data-hl-pane-last={i === config.views.length - 1 ? '' : undefined}
 		>
 			<HorizonLayoutNode
 				bind:config={config.views[i]!}
@@ -150,6 +179,15 @@
 				{formatRatio}
 				{formatRatioForAria}
 				{baseClass}
+				{onAddTab}
+				{paneToolbar}
+				{keepAlive}
+				{tabCycleButtons}
+				{onRenameTab}
+				{toolbarStart}
+				{toolbarEnd}
+				{onCloseTab}
+				{onActivate}
 			></HorizonLayoutNode>
 		</div>
 
@@ -174,6 +212,7 @@
 					aria-valuenow={formatRatioForAria(splitPoint!)}
 					aria-valuetext={formatRatio(splitPoint!)}
 					onpointerdown={(event) => startResize(event, i)}
+					ondblclick={() => equalizeAdjacentPanes(i)}
 					onfocus={() => {
 						if (!disableResizeSplits) activeResizer = i;
 					}}
