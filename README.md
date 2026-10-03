@@ -8,9 +8,9 @@
 
 ```svelte
 <script lang="ts">
-	import { HorizonLayout } from 'horizon-layout';
+	import { HorizonLayout } from '@turtle.tech/tile-engine';
 	import { SvelteMap } from 'svelte/reactivity';
-	import type { LayoutConfig } from 'horizon-layout';
+	import type { LayoutConfig } from '@turtle.tech/tile-engine';
 
 	const views = new SvelteMap([
 		['editor', { title: 'Editor', snippet: editorSnippet }],
@@ -207,7 +207,7 @@ Pass `keyboardControls` to override any subset of these.
 ## Custom keyboard controls
 
 ```ts
-import type { KeyboardControls } from 'horizon-layout';
+import type { KeyboardControls } from '@turtle.tech/tile-engine';
 
 const keyboardControls: KeyboardControls = {
 	tabGroupControls: [
@@ -229,7 +229,7 @@ Both arrays replace their respective defaults entirely when provided.
 Parse an unknown value (e.g. from `JSON.parse`) into a typed `LayoutConfig`. Throws a descriptive error if the value does not match the expected shape. Unknown extra fields are ignored.
 
 ```ts
-import { parseLayoutConfig } from 'horizon-layout';
+import { parseLayoutConfig } from '@turtle.tech/tile-engine';
 
 const raw = localStorage.getItem('layout');
 if (raw) {
@@ -250,7 +250,7 @@ if (raw) {
 Validate a `LayoutConfig` before passing it to `HorizonLayout`. Throws an `Error` describing the first problem found if the config is invalid, and returns nothing.
 
 ```ts
-import { validateConfig } from 'horizon-layout';
+import { validateConfig } from '@turtle.tech/tile-engine';
 
 try {
 	validateConfig(config, views, {
