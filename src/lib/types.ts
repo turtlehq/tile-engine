@@ -6,9 +6,26 @@ export type Id<T extends string = string> = T extends '' ? never : T;
 // Whether a split container lays its children side-by-side or stacked.
 export type SplitDirection = 'horizontal' | 'vertical';
 
+// Motion intensity for micro-interactions and animations. Consumers can read
+// the `data-motion` attribute (set from this value) to gate their own chrome.
+// - `full`: entry/zoom animations and hover micro-interactions.
+// - `reduced`: micro-transitions only, no entry/zoom animations.
+// - `none`: all transitions and animations disabled.
+export type Motion = 'full' | 'reduced' | 'none';
+
+// Semantic tone for a view's tab, driven by the state of the pane's content.
+export type ViewTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
+
 // Everything HorizonLayout needs to know about a single panel's content.
 export interface View {
 	title: string;
+	// Semantic tone; colours the tab's icon, badge and active accent.
+	// Default: 'accent'.
+	tone?: ViewTone;
+	// When true the icon slot renders a spinner (e.g. a running process).
+	busy?: boolean;
+	// Optional short badge rendered in the tab — a count or a compact label.
+	badge?: string | number;
 	// Optional icon rendered inside the tab, to the left of the title.
 	icon?: Snippet;
 	// The panel body. Rendered inside the active tab's content area.
@@ -19,6 +36,8 @@ export interface View {
 	// When false, the built-in close button is hidden even if `onCloseTab` is
 	// provided. Default true. Has no effect without `onCloseTab`.
 	closable?: boolean;
+	// When true, the pane toolbar is suppressed when this view is active.
+	hideToolbar?: boolean;
 }
 
 // A node that splits its space among two or more children.

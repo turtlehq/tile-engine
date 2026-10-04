@@ -320,6 +320,214 @@ export function selectAdjacentTabInLayout(
 	return next;
 }
 
+export const GROUP_VIEW_PREFIX = 'group:';
+
+export function isGroupViewId(id: string): boolean {
+	return typeof id === 'string' && id.startsWith(GROUP_VIEW_PREFIX);
+}
+
+export function toGroupViewId(id: string): string {
+	return `${GROUP_VIEW_PREFIX}${id}`;
+}
+
+export function toGroupId(viewId: string): string | null {
+	return isGroupViewId(viewId) ? viewId.slice(GROUP_VIEW_PREFIX.length) : null;
+}
+
+export interface TabNavLeaf {
+	viewId: string;
+	groupViewId: string | null;
+}
+
+export type SelectAdjacentTabDrillingResult = {
+	config: LayoutConfig;
+	groupUpdates: Record<string, LayoutConfig>;
+	focusViewId: string;
+	focusGroupViewId: string | null;
+};
+
+function collectTabsInOrder(node: NodeConfig): string[] {
+	const tabs: string[] = [];
+	const walk = (n: NodeConfig) => {
+		if (nodeConfigType(n) === 'tabGroup') {
+			for (const id of (n as TabGroupConfig).tabs) tabs.push(id);
+			return;
+		}
+		for (const child of (n as SplitConfig).views) walk(child);
+	};
+	walk(node);
+	return tabs;
+}
+
+export function primaryActiveTabId(config: LayoutConfig): string | null {
+	if (!config.root) return null;
+	if (config.maximizedView) return config.maximizedView;
+	const group = findFirstTabGroup(config.root);
+	if (!group || group.tabs.length === 0) return null;
+	return group.tabs[group.activeTabIndex] ?? group.tabs[0] ?? null;
+}
+
+function resolveOuterScopeGroup(
+	config: LayoutConfig,
+	activeViewId: string,
+	groupLayouts: Readonly<Record<string, LayoutConfig>>,
+	activeGroupViewId?: string | null
+): TabGroupConfig | null {
+	if (!config.root) return null;
+
+	if (activeGroupViewId && (activeGroupViewId.startsWith(GROUP_VIEW_PREFIX) || groupLayouts[activeGroupViewId])) {
+		return findTabGroupForViewId(config.root, activeGroupViewId);
+	}
+	if (activeViewId.startsWith(GROUP_VIEW_PREFIX) || groupLayouts[activeViewId]) {
+		return findTabGroupForViewId(config.root, activeViewId);
+	}
+	for (const [groupId, inner] of Object.entries(groupLayouts)) {
+		if (!inner?.root || !findTabGroupForViewId(inner.root, activeViewId)) continue;
+		const groupViewId = groupId.startsWith(GROUP_VIEW_PREFIX) ? groupId : `${GROUP_VIEW_PREFIX}${groupId}`;
+		const found = findTabGroupForViewId(config.root, groupViewId) ?? findTabGroupForViewId(config.root, groupId);
+		if (found) return found;
+	}
+	return findTabGroupForViewId(config.root, activeViewId);
+}
+
+/** Flatten one outer tab row, expanding each group into its container tab order. */
+export function flattenTabNavigationOrder(
+	scopeGroup: TabGroupConfig,
+	groupLayouts: Readonly<Record<string, LayoutConfig>>
+): TabNavLeaf[] {
+	const result: TabNavLeaf[] = [];
+	for (const tabId of scopeGroup.tabs) {
+		const isPrefixed = tabId.startsWith(GROUP_VIEW_PREFIX);
+		const groupId = isPrefixed ? tabId.slice(GROUP_VIEW_PREFIX.length) : tabId;
+		const inner = groupLayouts[groupId] ?? groupLayouts[tabId];
+		if (!inner?.root) {
+			result.push({ viewId: tabId, groupViewId: null });
+			continue;
+		}
+		for (const innerId of collectTabsInOrder(inner.root)) {
+			result.push({ viewId: innerId, groupViewId: tabId });
+		}
+	}
+	return result;
+}
+
+function resolveTabNavCursor(
+	order: readonly TabNavLeaf[],
+	activeViewId: string,
+	groupLayouts: Readonly<Record<string, LayoutConfig>>,
+	activeGroupViewId?: string | null
+): TabNavLeaf | null {
+	if (order.length === 0) return null;
+
+	const groupContext =
+		activeGroupViewId && (activeGroupViewId.startsWith(GROUP_VIEW_PREFIX) || groupLayouts[activeGroupViewId])
+			? activeGroupViewId
+			: activeViewId.startsWith(GROUP_VIEW_PREFIX) || groupLayouts[activeViewId]
+				? activeViewId
+				: null;
+
+	if (groupContext) {
+		const groupId = groupContext.startsWith(GROUP_VIEW_PREFIX)
+			? groupContext.slice(GROUP_VIEW_PREFIX.length)
+			: groupContext;
+		const inner = groupLayouts[groupId] ?? groupLayouts[groupContext];
+		const leafId =
+			activeViewId === groupContext || activeViewId.startsWith(GROUP_VIEW_PREFIX)
+				? (inner ? primaryActiveTabId(inner) : null)
+				: activeViewId;
+		if (leafId) {
+			const exact = order.find((entry) => entry.groupViewId === groupContext && entry.viewId === leafId);
+			if (exact) return exact;
+		}
+		return order.find((entry) => entry.groupViewId === groupContext) ?? null;
+	}
+
+	for (const [groupId, inner] of Object.entries(groupLayouts)) {
+		if (!inner?.root || !findTabGroupForViewId(inner.root, activeViewId)) continue;
+		const groupViewId = groupId.startsWith(GROUP_VIEW_PREFIX) ? groupId : `${GROUP_VIEW_PREFIX}${groupId}`;
+		const exact = order.find(
+			(entry) => (entry.groupViewId === groupViewId || entry.groupViewId === groupId) && entry.viewId === activeViewId
+		);
+		if (exact) return exact;
+	}
+
+	return order.find((entry) => entry.groupViewId === null && entry.viewId === activeViewId) ?? null;
+}
+
+/**
+ * Cycle tabs in the active outer row, drilling into group containers then continuing out.
+ * Activation only — does not move tabs across group boundaries.
+ */
+export function selectAdjacentTabDrillingGroups(
+	config: LayoutConfig,
+	activeViewId: string,
+	delta: -1 | 1,
+	groupLayouts: Readonly<Record<string, LayoutConfig>>,
+	options?: { activeGroupViewId?: string | null }
+): SelectAdjacentTabDrillingResult | null {
+	if (!config.root) return null;
+
+	const scopeGroup = resolveOuterScopeGroup(
+		config,
+		activeViewId,
+		groupLayouts,
+		options?.activeGroupViewId
+	);
+	if (!scopeGroup) return null;
+
+	const order = flattenTabNavigationOrder(scopeGroup, groupLayouts);
+	if (order.length <= 1) return null;
+
+	const cursor = resolveTabNavCursor(order, activeViewId, groupLayouts, options?.activeGroupViewId);
+	if (!cursor) return null;
+
+	const index = order.indexOf(cursor);
+	if (index < 0) return null;
+	const nextLeaf = order[(index + delta + order.length) % order.length];
+	if (!nextLeaf) return null;
+
+	const nextConfig = cloneConfig(config);
+	if (!nextConfig.root) return null;
+	const groupUpdates: Record<string, LayoutConfig> = {};
+
+	if (nextLeaf.groupViewId) {
+		const targetGroup = findTabGroupForViewId(nextConfig.root, nextLeaf.groupViewId);
+		if (targetGroup) {
+			targetGroup.activeTabIndex = targetGroup.tabs.indexOf(nextLeaf.groupViewId);
+		}
+		if (nextConfig.maximizedView) nextConfig.maximizedView = nextLeaf.groupViewId;
+
+		const isPrefixed = nextLeaf.groupViewId.startsWith(GROUP_VIEW_PREFIX);
+		const groupId = isPrefixed ? nextLeaf.groupViewId.slice(GROUP_VIEW_PREFIX.length) : nextLeaf.groupViewId;
+		const source = groupLayouts[groupId] ?? groupLayouts[nextLeaf.groupViewId];
+		if (source?.root) {
+			const inner = cloneConfig(source);
+			if (inner.root) {
+				const innerGroup = findTabGroupForViewId(inner.root, nextLeaf.viewId);
+				if (innerGroup) {
+					innerGroup.activeTabIndex = innerGroup.tabs.indexOf(nextLeaf.viewId);
+				}
+				if (inner.maximizedView) inner.maximizedView = nextLeaf.viewId;
+				groupUpdates[groupId] = inner;
+				if (isPrefixed) groupUpdates[nextLeaf.groupViewId] = inner;
+			}
+		}
+	} else {
+		const targetGroup = findTabGroupForViewId(nextConfig.root, nextLeaf.viewId);
+		if (targetGroup) {
+			targetGroup.activeTabIndex = targetGroup.tabs.indexOf(nextLeaf.viewId);
+		}
+		if (nextConfig.maximizedView) nextConfig.maximizedView = nextLeaf.viewId;
+	}
+
+	return {
+		config: nextConfig,
+		groupUpdates,
+		focusViewId: nextLeaf.viewId,
+		focusGroupViewId: nextLeaf.groupViewId
+	};
+}
+
 /** Swap the active tab with its neighbour in the same tab row. */
 export function moveActiveTabInLayout(
 	config: LayoutConfig,
@@ -464,6 +672,9 @@ export interface LayoutHandleDeps {
 	maxDepth?: number;
 	minWidthRatio?: number;
 	minHeightRatio?: number;
+	getGroupLayout?: (groupId: string) => LayoutConfig | undefined | null;
+	setGroupLayout?: (groupId: string, layout: LayoutConfig) => void;
+	getActiveGroupViewId?: () => string | null;
 }
 
 function focusView(id: Id) {
@@ -524,8 +735,36 @@ export function createLayoutHandle(deps: LayoutHandleDeps): LayoutHandle {
 		selectAdjacentTab(delta) {
 			const id = deps.getActiveTabId();
 			if (!id) return;
-			const next = selectAdjacentTabInLayout(deps.getConfig(), id, delta);
-			if (next !== deps.getConfig()) deps.setConfig(next);
+			const config = deps.getConfig();
+
+			if (deps.getGroupLayout && deps.setGroupLayout) {
+				const groupLayouts: Record<string, LayoutConfig> = {};
+				for (const tabId of collectTabViewIds(config)) {
+					const isPrefixed = tabId.startsWith(GROUP_VIEW_PREFIX);
+					const groupId = isPrefixed ? tabId.slice(GROUP_VIEW_PREFIX.length) : tabId;
+					const layout = deps.getGroupLayout(groupId) ?? deps.getGroupLayout(tabId);
+					if (layout) {
+						groupLayouts[groupId] = layout;
+						groupLayouts[tabId] = layout;
+					}
+				}
+
+				const result = selectAdjacentTabDrillingGroups(config, id, delta, groupLayouts, {
+					activeGroupViewId: deps.getActiveGroupViewId?.() ?? null
+				});
+				if (result) {
+					deps.setConfig(result.config);
+					for (const [groupId, layout] of Object.entries(result.groupUpdates)) {
+						deps.setGroupLayout(groupId, layout);
+					}
+					deps.setActiveTabId?.(result.focusViewId);
+					focusView(result.focusViewId);
+					return;
+				}
+			}
+
+			const next = selectAdjacentTabInLayout(config, id, delta);
+			if (next !== config) deps.setConfig(next);
 		},
 		moveActiveTab(delta) {
 			const id = deps.getActiveTabId();

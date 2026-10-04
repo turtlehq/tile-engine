@@ -1,0 +1,28 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - link "← HorizonLayout" [ref=e4] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e5]: fullscreen workspace
+    - generic [ref=e6]:
+      - text: "active:"
+      - code [ref=e7]: —
+    - button "Commands ⌘K" [ref=e8] [cursor=pointer]:
+      - text: Commands
+      - generic [ref=e9]: ⌘K
+    - 'button "Theme: dark" [ref=e10] [cursor=pointer]'
+    - button "Fullscreen" [ref=e11] [cursor=pointer]
+    - button "Settings ⌘⇧," [ref=e12] [cursor=pointer]:
+      - text: Settings
+      - generic [ref=e13]: ⌘⇧,
+  - contentinfo "Status bar" [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]: HorizonLayout
+      - generic [ref=e19]: main
+      - code [ref=e23]: —
+    - generic [ref=e24]: flush · full
+    - generic [ref=e25]:
+      - button "2 problems" [ref=e26] [cursor=pointer]:
+        - generic [ref=e30]: "2"
+      - button "Command palette" [ref=e31] [cursor=pointer]
+      - button "Cycle theme" [ref=e35] [cursor=pointer]
+      - button "Toggle fullscreen" [ref=e39] [cursor=pointer]

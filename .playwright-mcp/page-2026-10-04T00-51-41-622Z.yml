@@ -1,0 +1,159 @@
+- generic [ref=f12e2]:
+  - banner [ref=f12e3]:
+    - link "← HorizonLayout" [ref=f12e4] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f12e5]: fullscreen workspace
+    - generic [ref=f12e6]:
+      - text: "active:"
+      - code [ref=f12e7]: pane:htgm8
+    - button "Commands ⌘K" [ref=f12e8] [cursor=pointer]:
+      - text: Commands
+      - generic [ref=f12e9]: ⌘K
+    - 'button "Theme: dark" [ref=f12e10] [cursor=pointer]'
+    - button "Fullscreen" [ref=f12e11] [cursor=pointer]
+    - button "Settings ⌘⇧," [ref=f12e12] [cursor=pointer]:
+      - text: Settings
+      - generic [ref=f12e13]: ⌘⇧,
+  - generic [ref=f12e15]:
+    - generic [ref=f12e17]:
+      - group [ref=f12e255]:
+        - generic [ref=f12e256]:
+          - generic [ref=f12e257]:
+            - button "Previous tab" [disabled] [ref=f12e258]
+            - button "Next tab" [ref=f12e261] [cursor=pointer]
+          - generic [ref=f12e264]:
+            - tablist [ref=f12e265]:
+              - tab "Explorer Close tab" [ref=f12e266] [cursor=pointer]:
+                - generic [ref=f12e270]: Explorer
+                - button "Close tab" [ref=f12e271]
+              - tab "Search Close tab" [ref=f12e274] [cursor=pointer]:
+                - generic [ref=f12e279]: Search
+                - button "Close tab" [ref=f12e280]
+              - button "New tab" [ref=f12e283] [cursor=pointer]
+            - button "1 tab off-screen to the right" [ref=f12e286] [cursor=pointer]:
+              - generic [ref=f12e287]: "1"
+        - generic [ref=f12e291]:
+          - generic [ref=f12e292]:
+            - generic [ref=f12e293]: Explorer
+            - generic [ref=f12e296]:
+              - button "Split right" [ref=f12e297] [cursor=pointer]
+              - button "Split down" [ref=f12e300] [cursor=pointer]
+              - button "Toggle fullscreen pane" [ref=f12e303] [cursor=pointer]
+          - generic [ref=f12e306]: src/ ├─ lib/ │ ├─ HorizonLayout.svelte │ ├─ TabGroup.svelte │ └─ operations.ts └─ routes/
+      - slider "Resize pane 1" [ref=f12e308]
+      - group [ref=f12e310]:
+        - tablist [ref=f12e313]:
+          - tab "Pane 1 Close tab" [ref=f12e314] [cursor=pointer]:
+            - generic [ref=f12e318]: Pane 1
+            - button "Close tab" [ref=f12e319]
+          - button "New tab" [ref=f12e322] [cursor=pointer]
+        - generic [ref=f12e326]:
+          - generic [ref=f12e327]:
+            - generic [ref=f12e328]: Pane 1
+            - generic [ref=f12e331]:
+              - button "Split right" [ref=f12e332] [cursor=pointer]
+              - button "Split down" [ref=f12e335] [cursor=pointer]
+              - button "Toggle fullscreen pane" [ref=f12e338] [cursor=pointer]
+          - menu "Empty pane actions" [active] [ref=f12e343]:
+            - generic [ref=f12e344]:
+              - list [ref=f12e349]:
+                - listitem [ref=f12e350]:
+                  - button "Editor E" [ref=f12e351] [cursor=pointer]:
+                    - generic [ref=f12e354]: Editor
+                    - generic: E
+                - listitem [ref=f12e355]:
+                  - button "Terminal T" [ref=f12e356] [cursor=pointer]:
+                    - generic [ref=f12e360]: Terminal
+                    - generic: T
+                - listitem [ref=f12e361]:
+                  - button "Note N" [ref=f12e362] [cursor=pointer]:
+                    - generic [ref=f12e367]: Note
+                    - generic: "N"
+                - listitem [ref=f12e368]:
+                  - button "Group G" [ref=f12e369] [cursor=pointer]:
+                    - generic [ref=f12e373]: Group
+                    - generic: G
+              - paragraph [ref=f12e374]:
+                - generic [ref=f12e377]: Or open a file from the Explorer on the left.
+      - slider "Resize pane 2" [ref=f12e378]
+      - generic [ref=f12e380]:
+        - generic [ref=f12e382]:
+          - group [ref=f12e384]:
+            - generic [ref=f12e385]:
+              - generic [ref=f12e386]:
+                - button "Previous tab" [disabled] [ref=f12e387]
+                - button "Next tab" [ref=f12e390] [cursor=pointer]
+              - tablist [ref=f12e394]:
+                - tab "HorizonLayout.svelte Close tab" [ref=f12e395] [cursor=pointer]:
+                  - generic [ref=f12e399]: HorizonLayout.svelte
+                  - button "Close tab" [ref=f12e400]
+                - tab "Preview Close tab" [ref=f12e403] [cursor=pointer]:
+                  - generic [ref=f12e408]: Preview
+                  - button "Close tab" [ref=f12e409]
+                - tab "Problems 2 Close tab" [ref=f12e412] [cursor=pointer]:
+                  - generic [ref=f12e417]: Problems
+                  - generic [ref=f12e418]: "2"
+                  - button "Close tab" [ref=f12e419]
+                - button "New tab" [ref=f12e422] [cursor=pointer]
+            - generic [ref=f12e426]:
+              - generic [ref=f12e427]:
+                - generic [ref=f12e428]: HorizonLayout.svelte
+                - generic [ref=f12e431]:
+                  - button "Split right" [ref=f12e432] [cursor=pointer]
+                  - button "Split down" [ref=f12e435] [cursor=pointer]
+                  - button "Toggle fullscreen pane" [ref=f12e438] [cursor=pointer]
+              - generic [ref=f12e441]: "<HorizonLayout bind:config {views} />"
+          - slider "Resize pane 1" [ref=f12e443]
+          - group [ref=f12e445]:
+            - generic [ref=f12e446]:
+              - generic [ref=f12e447]:
+                - button "Previous tab" [disabled] [ref=f12e448]
+                - button "Next tab" [ref=f12e451] [cursor=pointer]
+              - tablist [ref=f12e455]:
+                - tab "Inspector Close tab" [ref=f12e456] [cursor=pointer]:
+                  - generic [ref=f12e461]: Inspector
+                  - button "Close tab" [ref=f12e462]
+                - tab "Outline Close tab" [ref=f12e465] [cursor=pointer]:
+                  - generic [ref=f12e469]: Outline
+                  - button "Close tab" [ref=f12e470]
+                - button "New tab" [ref=f12e473] [cursor=pointer]
+            - generic [ref=f12e477]:
+              - generic [ref=f12e478]:
+                - generic [ref=f12e479]: Inspector
+                - generic [ref=f12e483]:
+                  - button "Split right" [ref=f12e484] [cursor=pointer]
+                  - button "Split down" [ref=f12e487] [cursor=pointer]
+                  - button "Toggle fullscreen pane" [ref=f12e490] [cursor=pointer]
+              - generic [ref=f12e493]: "LayoutConfig { root, maximizedView }"
+        - slider "Resize pane 1" [ref=f12e495]
+        - group [ref=f12e497]:
+          - tablist [ref=f12e500]:
+            - tab "Terminal Close tab" [ref=f12e501] [cursor=pointer]:
+              - generic [ref=f12e506]: Terminal
+              - button "Close tab" [ref=f12e507]
+            - button "New tab" [ref=f12e510] [cursor=pointer]
+          - generic [ref=f12e514]:
+            - generic [ref=f12e515]:
+              - generic [ref=f12e516]: Terminal
+              - generic [ref=f12e520]:
+                - button "Split right" [ref=f12e521] [cursor=pointer]
+                - button "Split down" [ref=f12e524] [cursor=pointer]
+                - button "Toggle fullscreen pane" [ref=f12e527] [cursor=pointer]
+            - generic [ref=f12e531]:
+              - generic [ref=f12e532]: Idle
+              - generic [ref=f12e533]: $ ready
+              - generic [ref=f12e534]:
+                - button "Run" [ref=f12e535] [cursor=pointer]
+                - button "Fail" [ref=f12e536] [cursor=pointer]
+    - contentinfo "Status bar" [ref=f12e227]:
+      - generic [ref=f12e228]:
+        - generic [ref=f12e229]: HorizonLayout
+        - generic [ref=f12e230]: main
+        - code [ref=f12e234]: pane:htgm8
+      - generic [ref=f12e235]: flush · full
+      - generic [ref=f12e236]:
+        - button "2 problems" [ref=f12e237] [cursor=pointer]:
+          - generic [ref=f12e241]: "2"
+        - button "Command palette" [ref=f12e242] [cursor=pointer]
+        - button "Cycle theme" [ref=f12e246] [cursor=pointer]
+        - button "Toggle fullscreen" [ref=f12e250] [cursor=pointer]

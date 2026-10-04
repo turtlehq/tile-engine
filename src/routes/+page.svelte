@@ -36,6 +36,7 @@
 	let togFrames = $state(true);
 	let togAdd = $state(true);
 	let togInset = $state(true);
+	let togDimPanes = $state(true);
 
 	// ── Preview A Layout ──
 	let configA: LayoutConfig = $state({
@@ -515,6 +516,7 @@
 				bind:config={configA_rendered}
 				views={viewsA_inner}
 				paneToolbar={renderToolbarSnippetA}
+				dimOtherPanes={togDimPanes}
 				onAddTab={(tg) => addTabToGroup(tg, 'rendered-a', viewsA_inner)}
 			/>
 		</div>
@@ -528,6 +530,7 @@
 				bind:config={configA_code}
 				views={viewsA_codeInner}
 				paneToolbar={renderToolbarSnippetA_code}
+				dimOtherPanes={togDimPanes}
 				onAddTab={(tg) => addTabToGroup(tg, 'code-a', viewsA_codeInner)}
 			/>
 		</div>
@@ -627,6 +630,7 @@
 				bind:config={configB_rendered}
 				views={viewsB_inner}
 				paneToolbar={renderToolbarSnippetB}
+				dimOtherPanes={togDimPanes}
 				onAddTab={(tg) => addTabToGroup(tg, 'rendered-b', viewsB_inner)}
 			/>
 		</div>
@@ -640,6 +644,7 @@
 				bind:config={configB_code}
 				views={viewsB_codeInner}
 				paneToolbar={renderToolbarSnippetB_code}
+				dimOtherPanes={togDimPanes}
 				onAddTab={(tg) => addTabToGroup(tg, 'code-b', viewsB_codeInner)}
 			/>
 		</div>
@@ -733,6 +738,7 @@
 				bind:config={configStudio_group}
 				views={viewsStudio_group}
 				paneToolbar={renderToolbarStudio}
+				dimOtherPanes={togDimPanes}
 				onAddTab={(tg) => addTabToGroup(tg, 'studio-t', viewsStudio_group)}
 			/>
 		</div>
@@ -807,6 +813,7 @@
 						togFrames = true;
 						togAdd = true;
 						togInset = true;
+						togDimPanes = true;
 					}}
 				>
 					Reset Knobs
@@ -942,6 +949,10 @@
 						<Switch id="togInset" size="sm" bind:checked={togInset} />
 						<Label for="togInset" class="cursor-pointer text-xs">Nest inset</Label>
 					</div>
+					<div class="flex items-center gap-1.5">
+						<Switch id="togDim" size="sm" bind:checked={togDimPanes} />
+						<Label for="togDim" class="cursor-pointer text-xs">Dim on hover</Label>
+					</div>
 				</fieldset>
 			</div>
 		</Card.Content>
@@ -983,6 +994,7 @@
 						<HorizonLayout
 							bind:config={configA}
 							views={viewsA_outer}
+							dimOtherPanes={togDimPanes}
 							onAddTab={(tg) => addTabToGroup(tg, 'outer-a', viewsA_outer)}
 						/>
 					</div>
@@ -1001,6 +1013,7 @@
 						<HorizonLayout
 							bind:config={configB}
 							views={viewsB_outer}
+							dimOtherPanes={togDimPanes}
 							onAddTab={(tg) => addTabToGroup(tg, 'outer-b', viewsB_outer)}
 						/>
 					</div>
@@ -1017,6 +1030,7 @@
 				<HorizonLayout
 					bind:config={configStudio}
 					views={viewsStudio_outer}
+					dimOtherPanes={togDimPanes}
 					onAddTab={(tg) => addTabToGroup(tg, 'studio-outer', viewsStudio_outer)}
 				/>
 			</div>

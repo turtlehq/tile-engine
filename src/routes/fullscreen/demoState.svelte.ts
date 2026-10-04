@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { LayoutConfig } from '$lib/types.js';
+import type { LayoutConfig, Motion } from '$lib/types.js';
 import type { ShortcutChord } from '$lib/shortcuts/types.js';
 import { parseLayoutConfig } from '$lib/utils.js';
 
@@ -25,6 +25,8 @@ export interface DemoSettings {
 	hideTabBar: boolean;
 	keepAlive: boolean;
 	tabCycleButtons: boolean;
+	dimOtherPanes: boolean;
+	motion: Motion;
 }
 
 export const DEFAULT_SETTINGS: DemoSettings = {
@@ -44,7 +46,9 @@ export const DEFAULT_SETTINGS: DemoSettings = {
 	disableDragAndDrop: false,
 	hideTabBar: false,
 	keepAlive: true,
-	tabCycleButtons: true
+	tabCycleButtons: true,
+	dimOtherPanes: true,
+	motion: 'full'
 };
 
 const SETTINGS_KEY = 'horizon-layout:fullscreen:settings:v1';

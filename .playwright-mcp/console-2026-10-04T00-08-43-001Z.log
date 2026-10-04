@@ -1,0 +1,1 @@
+[     838ms] [WARNING] [uiSession] crash frozen boundary getDb/getSession must be used within <JazzSvelteProvider> or <JazzSvelteClientProvider> @ http://localhost:5173/node_modules/.pnpm/@sveltejs+kit@2.65.1_@opentelemetry+api@1.9.1_@sveltejs+vite-plugin-svelte@5.1.1_svelte_6c7a94165138bfc82c61a4ad9b3af8ba/node_modules/@sveltejs/kit/src/runtime/client/client.js?v=5dff9a25:3387

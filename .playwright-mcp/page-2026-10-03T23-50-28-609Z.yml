@@ -1,0 +1,198 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - link "← HorizonLayout" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]: fullscreen workspace
+      - generic [ref=e6]:
+        - text: "active:"
+        - code [ref=e7]: explorer
+      - button "Commands ⌘K" [ref=e8] [cursor=pointer]:
+        - text: Commands
+        - generic [ref=e9]: ⌘K
+      - 'button "Theme: dark" [ref=e10] [cursor=pointer]'
+      - button "Fullscreen" [ref=e11] [cursor=pointer]
+      - button "Settings ⌘⇧," [active] [ref=e12] [cursor=pointer]:
+        - text: Settings
+        - generic [ref=e13]: ⌘⇧,
+    - generic [ref=e17]:
+      - group [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Previous tab" [disabled] [ref=e22]
+            - button "Next tab" [ref=e25] [cursor=pointer]
+          - tablist [ref=e28]:
+            - tab "Explorer Close tab" [ref=e29] [cursor=pointer]:
+              - generic [ref=e33]: Explorer
+              - button "Close tab" [ref=e34]
+            - tab "Search Close tab" [ref=e37] [cursor=pointer]:
+              - generic [ref=e42]: Search
+              - button "Close tab" [ref=e43]
+            - button "New tab" [ref=e46] [cursor=pointer]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - generic [ref=e52]: Explorer
+            - generic [ref=e55]:
+              - button "Split right" [ref=e56] [cursor=pointer]
+              - button "Split down" [ref=e59] [cursor=pointer]
+              - button "Toggle fullscreen pane" [ref=e62] [cursor=pointer]
+          - generic [ref=e65]: src/ ├─ lib/ │ ├─ HorizonLayout.svelte │ ├─ TabGroup.svelte │ └─ operations.ts └─ routes/
+      - slider "Resize pane 1" [ref=e67]
+      - generic [ref=e69]:
+        - generic [ref=e71]:
+          - group [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - button "Previous tab" [disabled] [ref=e76]
+                - button "Next tab" [ref=e79] [cursor=pointer]
+              - tablist [ref=e82]:
+                - tab "HorizonLayout.svelte Close tab" [ref=e83] [cursor=pointer]:
+                  - generic [ref=e87]: HorizonLayout.svelte
+                  - button "Close tab" [ref=e88]
+                - tab "Preview Close tab" [ref=e91] [cursor=pointer]:
+                  - generic [ref=e96]: Preview
+                  - button "Close tab" [ref=e97]
+                - tab "Problems 2 Close tab" [ref=e100] [cursor=pointer]:
+                  - generic [ref=e105]: Problems
+                  - generic [ref=e106]: "2"
+                  - button "Close tab" [ref=e107]
+                - button "New tab" [ref=e110] [cursor=pointer]
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - generic [ref=e116]: HorizonLayout.svelte
+                - generic [ref=e119]:
+                  - button "Split right" [ref=e120] [cursor=pointer]
+                  - button "Split down" [ref=e123] [cursor=pointer]
+                  - button "Toggle fullscreen pane" [ref=e126] [cursor=pointer]
+              - generic [ref=e129]: "<HorizonLayout bind:config {views} />"
+          - slider "Resize pane 1" [ref=e131]
+          - group [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - button "Previous tab" [disabled] [ref=e136]
+                - button "Next tab" [ref=e139] [cursor=pointer]
+              - tablist [ref=e142]:
+                - tab "Inspector Close tab" [ref=e143] [cursor=pointer]:
+                  - generic [ref=e148]: Inspector
+                  - button "Close tab" [ref=e149]
+                - tab "Outline Close tab" [ref=e152] [cursor=pointer]:
+                  - generic [ref=e156]: Outline
+                  - button "Close tab" [ref=e157]
+                - button "New tab" [ref=e160] [cursor=pointer]
+            - generic [ref=e164]:
+              - generic [ref=e165]:
+                - generic [ref=e166]: Inspector
+                - generic [ref=e170]:
+                  - button "Split right" [ref=e171] [cursor=pointer]
+                  - button "Split down" [ref=e174] [cursor=pointer]
+                  - button "Toggle fullscreen pane" [ref=e177] [cursor=pointer]
+              - generic [ref=e180]: "LayoutConfig { root, maximizedView }"
+        - slider "Resize pane 1" [ref=e182]
+        - group [ref=e184]:
+          - tablist [ref=e186]:
+            - tab "Terminal Close tab" [ref=e187] [cursor=pointer]:
+              - generic [ref=e192]: Terminal
+              - button "Close tab" [ref=e193]
+            - button "New tab" [ref=e196] [cursor=pointer]
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - generic [ref=e202]: Terminal
+              - generic [ref=e206]:
+                - button "Split right" [ref=e207] [cursor=pointer]
+                - button "Split down" [ref=e210] [cursor=pointer]
+                - button "Toggle fullscreen pane" [ref=e213] [cursor=pointer]
+            - generic [ref=e217]:
+              - generic [ref=e218]: Idle
+              - generic [ref=e219]: $ ready
+              - generic [ref=e220]:
+                - button "Run" [ref=e221] [cursor=pointer]
+                - button "Fail" [ref=e222] [cursor=pointer]
+  - dialog "Layout settings" [ref=e225]:
+    - banner [ref=e226]:
+      - heading "Settings" [level=2] [ref=e227]
+      - button "Close" [ref=e228] [cursor=pointer]
+    - navigation "Settings sections" [ref=e231]:
+      - button "Keybindings" [ref=e232] [cursor=pointer]
+      - button "Layout" [ref=e233] [cursor=pointer]
+      - button "Appearance" [ref=e234] [cursor=pointer]
+    - generic [ref=e235]:
+      - paragraph [ref=e236]:
+        - text: Click a shortcut, then press the new combination. Esc cancels; use
+        - emphasis [ref=e237]: Unbind
+        - text: to disable.
+      - heading "Tabs" [level=3] [ref=e238]
+      - list [ref=e239]:
+        - listitem [ref=e240]:
+          - generic [ref=e241]: Close tab
+          - generic [ref=e242]:
+            - button "⌥+X" [ref=e243] [cursor=pointer]
+            - button "Unbind Close tab" [ref=e244] [cursor=pointer]
+        - listitem [ref=e247]:
+          - generic [ref=e248]: Next tab
+          - generic [ref=e249]:
+            - button "⌘+." [ref=e250] [cursor=pointer]
+            - button "Unbind Next tab" [ref=e251] [cursor=pointer]
+        - listitem [ref=e254]:
+          - generic [ref=e255]: Previous tab
+          - generic [ref=e256]:
+            - button "⌘+," [ref=e257] [cursor=pointer]
+            - button "Unbind Previous tab" [ref=e258] [cursor=pointer]
+        - listitem [ref=e261]:
+          - generic [ref=e262]: Move tab right
+          - generic [ref=e263]:
+            - button "⌥+." [ref=e264] [cursor=pointer]
+            - button "Unbind Move tab right" [ref=e265] [cursor=pointer]
+        - listitem [ref=e268]:
+          - generic [ref=e269]: Move tab left
+          - generic [ref=e270]:
+            - button "⌥+," [ref=e271] [cursor=pointer]
+            - button "Unbind Move tab left" [ref=e272] [cursor=pointer]
+        - listitem [ref=e275]:
+          - generic [ref=e276]: New pane right
+          - generic [ref=e277]:
+            - button "⌘+/" [ref=e278] [cursor=pointer]
+            - button "Unbind New pane right" [ref=e279] [cursor=pointer]
+        - listitem [ref=e282]:
+          - generic [ref=e283]: New tab
+          - generic [ref=e284]:
+            - button "⌘+Space" [ref=e285] [cursor=pointer]
+            - button "Unbind New tab" [ref=e286] [cursor=pointer]
+      - heading "Panes & split" [level=3] [ref=e289]
+      - list [ref=e290]:
+        - listitem [ref=e291]:
+          - generic [ref=e292]: Split right
+          - generic [ref=e293]:
+            - button "⌘+\\" [ref=e294] [cursor=pointer]
+            - button "Unbind Split right" [ref=e295] [cursor=pointer]
+        - listitem [ref=e298]:
+          - generic [ref=e299]: Split down
+          - generic [ref=e300]:
+            - button "⌘+⌥+\\" [ref=e301] [cursor=pointer]
+            - button "Unbind Split down" [ref=e302] [cursor=pointer]
+        - listitem [ref=e305]:
+          - generic [ref=e306]: Fibonacci split
+          - generic [ref=e307]:
+            - button "⌘+⇧+/" [ref=e308] [cursor=pointer]
+            - button "Unbind Fibonacci split" [ref=e309] [cursor=pointer]
+        - listitem [ref=e312]:
+          - generic [ref=e313]: Frame active pane
+          - generic [ref=e314]:
+            - button "⌘+G" [ref=e315] [cursor=pointer]
+            - button "Unbind Frame active pane" [ref=e316] [cursor=pointer]
+      - heading "System" [level=3] [ref=e319]
+      - list [ref=e320]:
+        - listitem [ref=e321]:
+          - generic [ref=e322]: Open settings
+          - generic [ref=e323]:
+            - button "⌘+⇧+," [ref=e324] [cursor=pointer]
+            - button "Unbind Open settings" [ref=e325] [cursor=pointer]
+        - listitem [ref=e328]:
+          - generic [ref=e329]: Command palette
+          - generic [ref=e330]:
+            - button "⌘+K" [ref=e331] [cursor=pointer]
+            - button "Unbind Command palette" [ref=e332] [cursor=pointer]
+        - listitem [ref=e335]:
+          - generic [ref=e336]: Toggle theme
+          - generic [ref=e337]:
+            - button "⌥+T" [ref=e338] [cursor=pointer]
+            - button "Unbind Toggle theme" [ref=e339] [cursor=pointer]

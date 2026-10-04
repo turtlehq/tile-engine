@@ -1,12 +1,18 @@
 <script lang="ts">
-	import { onMount, createRawSnippet, type Snippet } from 'svelte';
+	import { mount, onMount, createRawSnippet, unmount, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import '$lib/horizon-layout.css';
 	import HorizonLayout from '$lib/HorizonLayout.svelte';
+	import EmptyPane from './EmptyPane.svelte';
+	import NoteEditor from './NoteEditor.svelte';
+	import GroupPane from './GroupPane.svelte';
+	import SplitSquareHorizontalIcon from '@lucide/svelte/icons/split-square-horizontal';
+	import SplitSquareVerticalIcon from '@lucide/svelte/icons/split-square-vertical';
 	import {
 		addPaneToLayout,
 		collectTabViewIds,
 		createLayoutHandle,
+		findTabGroupForViewId,
 		removeViewFromLayout,
 		splitNewPaneInLayout,
 		toggleMaximizedView
@@ -30,6 +36,62 @@
 
 	function leaf(inner: string): Snippet {
 		return createRawSnippet(() => ({ render: () => `<div class="leaf">${inner}</div>` }));
+	}
+
+	// Renders a live Svelte component as a pane-body snippet. HorizonLayout
+	// renders snippets via `{@render ...}`, which cannot mount components
+	// directly — so we expose an empty host element and mount into it.
+	function componentSnippet(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		component: any,
+		props: Record<string, unknown> = {}
+	): Snippet {
+		return createRawSnippet(() => ({
+			render: () => `<div class="hl-host"></div>`,
+			setup: (element) => {
+				const instance = mount(component as never, { target: element, props });
+				return () => unmount(instance);
+			}
+		}));
+	}
+
+	// ── Notes ──
+	// Each note pane is a plain textarea with its own title/body state, so we
+	// can test groups and notes together. Keyed by the note's view id.
+	const notes = $state<Record<string, { title: string; body: string }>>({});
+
+	function noteSnippet(id: Id): Snippet {
+		if (!notes[id]) notes[id] = { title: 'Untitled note', body: '' };
+		return componentSnippet(NoteEditor, {
+			get title() {
+				return notes[id]?.title ?? '';
+			},
+			get value() {
+				return notes[id]?.body ?? '';
+			},
+			onTitleChange: (next: string) => {
+				if (!notes[id]) return;
+				notes[id].title = next;
+				syncNoteView(id);
+			},
+			onValueChange: (next: string) => {
+				if (!notes[id]) return;
+				notes[id].body = next;
+				syncNoteView(id);
+			}
+		});
+	}
+
+	function syncNoteView(id: Id) {
+		const view = views.get(id);
+		const note = notes[id];
+		if (!view || !note) return;
+		const words = note.body.trim() ? note.body.trim().split(/\s+/).length : 0;
+		views.set(id, {
+			...view,
+			title: note.title || 'Untitled note',
+			badge: words > 0 ? words : undefined
+		});
 	}
 
 	const views = new SvelteMap<Id, View>();
@@ -59,9 +121,48 @@
 	views.set('problems', {
 		title: 'Problems',
 		icon: iconAlert,
-		snippet: leaf('0 errors · 0 warnings')
+		tone: 'warning',
+		badge: 2,
+		snippet: leaf('2 errors · 0 warnings')
 	});
-	views.set('terminal', { title: 'Terminal', icon: iconTerm, snippet: leaf('$ pnpm dev') });
+	views.set('terminal', { title: 'Terminal', icon: iconTerm, snippet: snippetTerminal });
+
+	// Content-driven tab state: the terminal pane pushes busy/tone/badge so the
+	// tab shows a spinner while running, turns red on failure, and badges runs.
+	let termState = $state<'idle' | 'running' | 'success' | 'error'>('idle');
+	let termRuns = $state(0);
+
+	function syncTerminalView() {
+		const view = views.get('terminal');
+		if (!view) return;
+		views.set('terminal', {
+			...view,
+			busy: termState === 'running',
+			tone: termState === 'error' ? 'danger' : termState === 'success' ? 'success' : 'neutral',
+			badge: termRuns > 0 ? termRuns : undefined
+		});
+	}
+
+	function runTerminal() {
+		if (termState === 'running') return;
+		termState = 'running';
+		syncTerminalView();
+		setTimeout(() => {
+			termRuns += 1;
+			termState = 'success';
+			syncTerminalView();
+		}, 1600);
+	}
+
+	function failTerminal() {
+		if (termState === 'running') return;
+		termState = 'running';
+		syncTerminalView();
+		setTimeout(() => {
+			termState = 'error';
+			syncTerminalView();
+		}, 1200);
+	}
 	views.set('inspector', {
 		title: 'Inspector',
 		icon: iconGauge,
@@ -82,11 +183,85 @@
 		paneSeq += 1;
 		const id = randomPaneId();
 		views.set(id, {
-			title: `Untitled ${paneSeq}`,
+			title: `Pane ${paneSeq}`,
 			icon: iconSpark,
-			snippet: leaf(`New pane · ${id}`)
+			snippet: emptyPaneSnippet(id)
 		});
 		return id;
+	}
+
+	// The empty pane presents pane-creation actions; picking one replaces the
+	// empty pane in place with the chosen view.
+	function emptyPaneSnippet(id: Id): Snippet {
+		return componentSnippet(EmptyPane, {
+			onOpenNote: () => replaceWithNote(id),
+			onOpenGroup: () => replaceWithGroup(id),
+			onOpenTerminal: () => replaceWith(id, 'terminal'),
+			onOpenEditor: () => replaceWith(id, 'editor')
+		});
+	}
+
+	// Swap the view rendered by an existing tab, keeping its layout position.
+	function replaceWith(id: Id, targetId: Id) {
+		const view = views.get(targetId);
+		if (!view) return;
+		views.set(id, view);
+		activeView = id;
+	}
+
+	let noteSeq = 0;
+	function replaceWithNote(id: Id) {
+		noteSeq += 1;
+		notes[id] = { title: `Note ${noteSeq}`, body: '' };
+		views.set(id, {
+			title: notes[id].title,
+			icon: iconNote,
+			snippet: noteSnippet(id)
+		});
+		activeView = id;
+	}
+
+	const groupLayouts = $state<Record<string, LayoutConfig>>({});
+
+	// Groups nest a fresh HorizonLayout inside the pane body, so a group is a
+	// layout within a layout — the core thing we want to exercise.
+	function replaceWithGroup(id: Id) {
+		const groupId = id.startsWith('group:') ? id.slice(6) : id;
+		if (!groupLayouts[groupId] && !groupLayouts[id]) {
+			groupLayouts[groupId] = {
+				root: {
+					tabs: ['g-editor', 'g-notes'],
+					activeTabIndex: 0
+				}
+			};
+		}
+		views.set(id, {
+			title: 'Group',
+			icon: iconGroup,
+			snippet: groupSnippet(id),
+			hideToolbar: true
+		});
+		activeView = id;
+	}
+
+	function groupSnippet(id: Id): Snippet {
+		const groupId = id.startsWith('group:') ? id.slice(6) : id;
+		return componentSnippet(GroupPane, {
+			groupId,
+			get config() {
+				return groupLayouts[groupId] ?? groupLayouts[id];
+			},
+			onConfigChange: (next: LayoutConfig) => {
+				groupLayouts[groupId] = next;
+				groupLayouts[id] = next;
+			},
+			onCycleTab: (_tg: TabGroupConfig, delta: -1 | 1) => {
+				layoutHandle.selectAdjacentTab(delta);
+			},
+			onActivateView: (innerViewId: Id) => {
+				activeView = innerViewId;
+			}
+		});
 	}
 
 	const DEFAULT_CONFIG: LayoutConfig = {
@@ -166,6 +341,28 @@
 			},
 			closeTab: (id) => closePane(id),
 			createPane,
+			getGroupLayout: (groupId) =>
+				groupLayouts[groupId] ??
+				groupLayouts[`group:${groupId}`] ??
+				groupLayouts[groupId.replace(/^group:/, '')],
+			setGroupLayout: (groupId, next) => {
+				const plain = groupId.replace(/^group:/, '');
+				groupLayouts[groupId] = next;
+				groupLayouts[plain] = next;
+				groupLayouts[`group:${plain}`] = next;
+			},
+			getActiveGroupViewId: () => {
+				if (!activeView) return null;
+				for (const [gid, glayout] of Object.entries(groupLayouts)) {
+					if (glayout?.root && findTabGroupForViewId(glayout.root, activeView)) {
+						if (config.root && findTabGroupForViewId(config.root, gid)) return gid;
+						if (config.root && findTabGroupForViewId(config.root, `group:${gid}`)) return `group:${gid}`;
+						return gid;
+					}
+				}
+				if (activeView.startsWith('group:') || groupLayouts[activeView]) return activeView;
+				return null;
+			},
 			...validateOptions
 		})
 	);
@@ -218,6 +415,12 @@
 
 	$effect(() => {
 		persistLayout(config);
+	});
+
+	// Mirror the motion setting onto <html> so host chrome (drawers, sidebars,
+	// overlays) can gate its own transitions on `:root[data-motion]`.
+	$effect(() => {
+		document.documentElement.dataset['motion'] = settings.motion;
 	});
 
 	function closePane(viewId: Id) {
@@ -319,6 +522,36 @@
 			d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"
 		/></svg
 	>{/snippet}
+{#snippet iconNote()}<svg viewBox="0 0 24 24" aria-hidden="true"
+		><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path
+			d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"
+		/><path d="M9 13h6M9 17h4" /></svg
+	>{/snippet}
+{#snippet iconGroup()}<svg viewBox="0 0 24 24" aria-hidden="true"
+		><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></svg
+	>{/snippet}
+
+{#snippet snippetTerminal()}
+	<div class="term">
+		<div class="term__status">
+			{termState === 'running'
+				? 'Running…'
+				: termState === 'error'
+					? 'Failed'
+					: termState === 'success'
+						? 'Passed'
+						: 'Idle'}
+		</div>
+		<div class="term__log">
+			{#if termState === 'running'}$ pnpm build…{:else if termState === 'error'}$ pnpm build<br />✖
+				exit 1{:else if termState === 'success'}$ pnpm build<br />✔ done in 1.6s{:else}$ ready{/if}
+		</div>
+		<div class="term__actions">
+			<button type="button" onclick={runTerminal} disabled={termState === 'running'}>Run</button>
+			<button type="button" onclick={failTerminal} disabled={termState === 'running'}>Fail</button>
+		</div>
+	</div>
+{/snippet}
 
 {#snippet toolbarStart(viewId: Id)}
 	{@const view = views.get(viewId)}
@@ -330,10 +563,10 @@
 
 {#snippet toolbarEnd(viewId: Id)}
 	<button type="button" class="pt" title="Split right" onclick={() => splitPane(viewId, 'right')}>
-		<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4 7h6M14 17h6" /></svg>
+		<SplitSquareHorizontalIcon />
 	</button>
 	<button type="button" class="pt" title="Split down" onclick={() => splitPane(viewId, 'down')}>
-		<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M7 4v6M17 14v6" /></svg>
+		<SplitSquareVerticalIcon />
 	</button>
 	<button
 		type="button"
@@ -355,10 +588,86 @@
 	</button>
 {/snippet}
 
+{#snippet statusBarDemo()}
+	<div class="horizon-layout__status-bar-cluster horizon-layout__status-bar-cluster--left">
+		<span class="horizon-layout__status-bar-item">HorizonLayout</span>
+		<span class="horizon-layout__status-bar-item">
+			<svg viewBox="0 0 24 24" aria-hidden="true"
+				><path
+					d="M6 3v12M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 9a9 9 0 0 0 9 9"
+				/></svg
+			>
+			main
+		</span>
+		<span class="horizon-layout__status-bar-item">
+			<code>{activeView ?? '—'}</code>
+		</span>
+	</div>
+	<div class="horizon-layout__status-bar-center">
+		<span class="horizon-layout__status-bar-center-label">
+			{settings.surface} · {settings.motion}
+		</span>
+	</div>
+	<div class="horizon-layout__status-bar-cluster horizon-layout__status-bar-cluster--right">
+		<button
+			type="button"
+			class="horizon-layout__status-bar-item horizon-layout__status-bar-item--button"
+			title="2 problems"
+			aria-label="2 problems"
+			onclick={() => {
+				paletteQuery = 'problems';
+				paletteOpen = true;
+			}}
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true"
+				><path d="M12 3 2 20h20L12 3Z" /><path d="M12 10v4M12 17h.01" /></svg
+			>
+			<span class="horizon-layout__status-bar-badge">2</span>
+		</button>
+		<button
+			type="button"
+			class="horizon-layout__status-bar-item horizon-layout__status-bar-item--button horizon-layout__status-bar-item--icon"
+			title="Command palette (⌘K)"
+			aria-label="Command palette"
+			onclick={() => (paletteOpen = true)}
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true"
+				><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg
+			>
+		</button>
+		<button
+			type="button"
+			class="horizon-layout__status-bar-item horizon-layout__status-bar-item--button horizon-layout__status-bar-item--icon"
+			title="Cycle theme"
+			aria-label="Cycle theme"
+			onclick={cycleTheme}
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true"
+				><circle cx="12" cy="12" r="4" /><path
+					d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2"
+				/></svg
+			>
+		</button>
+		<button
+			type="button"
+			class="horizon-layout__status-bar-item horizon-layout__status-bar-item--button horizon-layout__status-bar-item--icon"
+			class:horizon-layout__status-bar-item--active={isFullscreen}
+			title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+			aria-label="Toggle fullscreen"
+			onclick={toggleFullscreen}
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true"
+				><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" /></svg
+			>
+		</button>
+	</div>
+{/snippet}
+
 <div
 	class="demo-root"
 	data-theme={settings.theme}
 	data-style={settings.style}
+	data-surface={settings.surface}
 	style:--hl-local-accent={settings.accent}
 	style:--hl-accent={settings.accent}
 	style:--hl-pad="{settings.pad}px"
@@ -403,6 +712,8 @@
 			bind:config
 			bind:activeView
 			{views}
+			{groupLayouts}
+			onCycleTab={(_tg, delta) => layoutHandle.selectAdjacentTab(delta)}
 			surface={settings.surface}
 			{toolbarStart}
 			{toolbarEnd}
@@ -417,6 +728,9 @@
 			minWidthRatio={settings.minWidthRatio}
 			minHeightRatio={settings.minHeightRatio}
 			maxDepth={settings.maxDepth}
+			dimOtherPanes={settings.dimOtherPanes}
+			motion={settings.motion}
+			statusBar={statusBarDemo}
 		/>
 	</div>
 </div>
@@ -482,11 +796,27 @@
 		align-items: center;
 		gap: 0.5rem;
 		flex-shrink: 0;
-		height: 2.4rem;
-		padding: 0 0.75rem;
-		background: color-mix(in srgb, var(--hl-panel) 80%, black);
+		height: var(--hl-status-h, 26px);
+		padding: 0 var(--hl-pad);
+		background: #000000;
 		border-bottom: 1px solid var(--hl-frame);
-		font-size: 0.76rem;
+		font-size: 0.74rem;
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	.demo-root[data-surface='card'] .demo-bar {
+		margin: var(--hl-pad) var(--hl-pad) 0;
+		width: calc(100% - (var(--hl-pad) * 2));
+		border: 1px solid var(--hl-frame);
+		border-radius: var(--hl-radius) var(--hl-radius) 0 0;
+	}
+
+	.demo-root[data-surface='inset'] .demo-bar {
+		margin: calc(var(--hl-pad) / 2) calc(var(--hl-pad) / 2) 0;
+		width: calc(100% - var(--hl-pad));
+		border: 1px solid color-mix(in srgb, var(--hl-frame) 55%, transparent);
+		border-radius: var(--hl-radius) var(--hl-radius) 0 0;
 	}
 
 	.demo-bar__brand {
@@ -517,12 +847,14 @@
 	.demo-btn {
 		appearance: none;
 		font: inherit;
-		font-size: 0.72rem;
+		font-size: 0.7rem;
 		color: var(--hl-fg);
 		background: color-mix(in srgb, var(--hl-bg) 60%, transparent);
 		border: 1px solid var(--hl-frame);
-		border-radius: 6px;
-		padding: 0.25rem 0.55rem;
+		border-radius: 5px;
+		padding: 1px 7px;
+		height: 20px;
+		box-sizing: border-box;
 		cursor: pointer;
 		display: inline-flex;
 		align-items: center;
@@ -603,7 +935,50 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: 40%;
+		min-width: 0;
+	}
+
+	/* Terminal demo pane (content-driven tab state) */
+	.term {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.72rem;
+	}
+
+	.term__status {
+		color: var(--hl-muted);
+	}
+
+	.term__log {
+		color: var(--hl-fg);
+		line-height: 1.5;
+	}
+
+	.term__actions {
+		display: flex;
+		gap: 0.4rem;
+	}
+
+	.term__actions button {
+		font: inherit;
+		font-size: 0.72rem;
+		padding: 2px 8px;
+		border: 1px solid var(--hl-frame);
+		background: transparent;
+		color: var(--hl-fg);
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.term__actions button:hover:not(:disabled) {
+		border-color: var(--hl-local-accent);
+	}
+
+	.term__actions button:disabled {
+		opacity: 0.5;
+		cursor: default;
 	}
 
 	/* Command palette */
@@ -626,6 +1001,18 @@
 		border-radius: 10px;
 		overflow: hidden;
 		box-shadow: 0 20px 50px rgb(0 0 0 / 0.45);
+		animation: demo-pop-in var(--hl-motion-dur, 150ms) var(--hl-motion-ease, ease);
+	}
+
+	@keyframes demo-pop-in {
+		from {
+			opacity: 0;
+			transform: translateY(-6px) scale(0.99);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 
 	.palette__input {

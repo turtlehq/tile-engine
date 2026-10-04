@@ -14,6 +14,22 @@
 	--radius: 3px;
 	--accent-w: 3px;
 
+	/* Motion tokens — driven by the `data-motion` attribute. */
+	--hl-motion-dur: 150ms;
+	--hl-motion-dur-fast: 90ms;
+	--hl-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+	/* Semantic tone colours for view-driven tab state. */
+	--hl-tone-success: #3fb950;
+	--hl-tone-warning: #d29922;
+	--hl-tone-danger: #f85149;
+
+	/* Status bar — the bottom chrome region rendered from `statusBar`. */
+	--hl-status-h: 26px;
+	--hl-status-bg: color-mix(in srgb, var(--hl-bg) 62%, black);
+	--hl-status-fg: var(--hl-muted);
+	--hl-status-hover: color-mix(in srgb, var(--hl-fg) 12%, transparent);
+
 	--local-accent: var(--accent);
 	--active-bg: var(--panel);
 
@@ -246,6 +262,15 @@
 	border-radius: var(--hl-radius) var(--hl-radius) 0 0;
 }
 
+/* Detached cards begin below the tab strip, so trim vertical split dividers to
+   the card edge instead of letting them dangle through the empty tab row. The
+   `:has` guard keeps the full-height line when the tab bar is hidden. */
+.horizon-layout[data-surface='card']
+	.horizon-layout-split:has(.horizon-layout-tabgroup__tab-bar)
+	.horizon-layout-split__resizer--horizontal::after {
+	top: calc(var(--hl-tab-h) + 1px);
+}
+
 .horizon-layout[data-surface='inset'] {
 	padding: calc(var(--hl-pad) / 2);
 	background: color-mix(in srgb, var(--hl-bg) 70%, black);
@@ -263,7 +288,165 @@
 }
 
 .horizon-layout__content--maximized {
-	animation: hl-fade-in 80ms ease;
+	animation: hl-zoom-in var(--hl-motion-dur) var(--hl-motion-ease);
+}
+
+/* ── Status Bar ──
+   A bottom chrome region rendered from HorizonLayout's `statusBar` snippet.
+   The root becomes a column so the content flexes above the fixed-height bar. */
+.horizon-layout[data-status-bar='true'] {
+	display: flex;
+	flex-direction: column;
+}
+
+.horizon-layout[data-status-bar='true'] > .horizon-layout__content {
+	flex: 1 1 auto;
+	min-height: 0;
+	height: auto;
+}
+
+.horizon-layout__status-bar {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
+	gap: 0.5rem;
+	flex: 0 0 auto;
+	width: 100%;
+	height: var(--hl-status-h);
+	min-height: var(--hl-status-h);
+	padding: 0 0.5rem;
+	border-top: 1px solid var(--hl-frame);
+	background: var(--hl-status-bg);
+	color: var(--hl-status-fg);
+	font-size: 11px;
+	line-height: 1;
+	user-select: none;
+}
+
+.horizon-layout[data-surface='card'] .horizon-layout__status-bar,
+.horizon-layout[data-surface='inset'] .horizon-layout__status-bar {
+	margin-top: var(--hl-pad);
+	border: 1px solid var(--hl-frame);
+	border-radius: var(--hl-radius);
+}
+
+.horizon-layout__status-bar-cluster {
+	display: flex;
+	align-items: center;
+	gap: 0.125rem;
+	min-width: 0;
+}
+
+.horizon-layout__status-bar-cluster--left {
+	grid-column: 1;
+	justify-self: start;
+}
+
+.horizon-layout__status-bar-cluster--right {
+	grid-column: 3;
+	justify-self: end;
+}
+
+.horizon-layout__status-bar-center {
+	grid-column: 2;
+	justify-self: center;
+	max-width: min(40vw, 24rem);
+	min-width: 0;
+	overflow: hidden;
+}
+
+.horizon-layout__status-bar-center-label {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 10.5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.horizon-layout__status-bar-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	height: 100%;
+	padding: 0 0.375rem;
+	white-space: nowrap;
+	cursor: default;
+	color: inherit;
+}
+
+.horizon-layout__status-bar-item svg {
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.horizon-layout__status-bar-item--button {
+	appearance: none;
+	-webkit-appearance: none;
+	border: none;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+	border-radius: calc(var(--hl-radius) + 1px);
+	transition:
+		background var(--hl-motion-dur-fast) ease,
+		opacity var(--hl-motion-dur-fast) ease,
+		color var(--hl-motion-dur-fast) ease;
+}
+
+.horizon-layout__status-bar-item--button:hover {
+	background: var(--hl-status-hover);
+	color: var(--hl-fg);
+}
+
+.horizon-layout__status-bar-item--button:focus-visible {
+	outline: none;
+	box-shadow: inset 0 0 0 2px var(--hl-local-accent);
+}
+
+.horizon-layout__status-bar-item--icon {
+	width: 1.625rem;
+	padding: 0;
+	justify-content: center;
+	flex-shrink: 0;
+	opacity: 0.6;
+}
+
+.horizon-layout__status-bar-item--button.horizon-layout__status-bar-item--icon:hover {
+	opacity: 1;
+	background: transparent;
+}
+
+.horizon-layout__status-bar-item--active {
+	color: var(--hl-local-accent);
+	opacity: 1;
+}
+
+.horizon-layout__status-bar-item--disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.horizon-layout__status-bar-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1rem;
+	height: 1rem;
+	padding: 0 0.25rem;
+	border-radius: 999px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 9px;
+	font-weight: 600;
+	line-height: 1;
+	color: var(--hl-status-fg);
+	background: color-mix(in srgb, var(--hl-fg) 14%, transparent);
 }
 
 /* Maximized frame container */
@@ -329,7 +512,12 @@
 .nested,
 .horizon-layout--nested,
 .horizon-layout .horizon-layout {
-	margin-left: var(--hl-inset);
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	flex: 1 1 auto;
+	margin-left: 0;
 	--active-bg: color-mix(in srgb, var(--hl-panel) 72%, black);
 	--hl-active-bg: var(--active-bg);
 }
@@ -370,7 +558,17 @@
 	box-sizing: border-box;
 	background: transparent;
 	border: none;
-	font-size: 0.8rem;
+	font-size: 0.75rem;
+	transition: opacity 140ms ease;
+}
+
+/* ── Hover Dimming ──
+   When hovering over a pane, slightly dim all other unhovered panes in the layout. */
+.horizon-layout[data-dim-unhovered='true']:not([data-dragging='true']):has(
+		.horizon-layout-tabgroup:hover
+	)
+	.horizon-layout-tabgroup:not(:hover):not(:has(.horizon-layout-tabgroup:hover)) {
+	opacity: var(--hl-dim-opacity, 0.68);
 }
 
 /* Tab bar container (sits directly above frame body and overlaps top frame border by 1px) */
@@ -385,24 +583,92 @@
 	min-height: calc(var(--hl-tab-h) + 1px);
 	height: calc(var(--hl-tab-h) + 1px);
 	margin-bottom: -1px;
-	padding: 0 var(--hl-pad) 0 0;
+	padding: 0;
 	background: transparent;
 	border-bottom: none;
 	flex-shrink: 0;
+}
+
+/* Tabs scroll wrap (hosts overflow number indicators on the edges) */
+.horizon-layout-tabgroup__tabs-wrap {
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+	flex: 0 1 auto;
+	min-width: 0;
+	max-width: 100%;
+	height: calc(var(--hl-tab-h) + 1px);
+	overflow: hidden;
 }
 
 .horizon-layout-tabgroup__tabs {
 	display: flex;
 	align-items: flex-end;
 	gap: var(--hl-tab-gap);
-	flex: 1 1 auto;
+	flex: 0 1 auto;
 	min-width: 0;
+	max-width: 100%;
 	min-height: calc(var(--hl-tab-h) + 1px);
 	height: calc(var(--hl-tab-h) + 1px);
 	overflow-x: auto;
 	overflow-y: hidden;
 	scrollbar-width: none;
 	outline: none;
+}
+
+/* Horizontal tab overflow buttons */
+.horizon-layout-tabgroup__tab-scroll {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: 5;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 0 6px;
+	cursor: pointer;
+	color: var(--hl-muted);
+	background: var(--hl-bg);
+	border: 1px solid var(--hl-frame);
+	box-sizing: border-box;
+	font-family: inherit;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	height: calc(var(--hl-tab-h) + 1px);
+	margin: 0;
+	box-shadow: none;
+	transition:
+		color 60ms ease,
+		background 60ms ease;
+}
+
+.horizon-layout-tabgroup__tab-scroll:hover {
+	color: var(--hl-fg);
+	background: color-mix(in srgb, var(--hl-fg) 8%, var(--hl-bg));
+}
+
+.horizon-layout-tabgroup__tab-scroll svg {
+	display: block;
+	flex-shrink: 0;
+}
+
+.horizon-layout-tabgroup__tab-scroll--left {
+	left: 0;
+	border-right: 1px solid var(--hl-frame);
+	border-top: 1px solid var(--hl-frame);
+	border-bottom: 1px solid var(--hl-frame);
+	border-left: none;
+	border-radius: var(--hl-radius) 0 0 0;
+}
+
+.horizon-layout-tabgroup__tab-scroll--right {
+	right: 0;
+	border-left: 1px solid var(--hl-frame);
+	border-top: 1px solid var(--hl-frame);
+	border-bottom: 1px solid var(--hl-frame);
+	border-right: none;
+	border-radius: 0 var(--hl-radius) 0 0;
 }
 
 .horizon-layout-tabgroup__tabs::-webkit-scrollbar {
@@ -423,7 +689,7 @@
 	padding: 0 var(--hl-pad);
 	margin-bottom: 1px;
 	font: inherit;
-	font-size: 0.78rem;
+	font-size: 0.71rem;
 	color: var(--hl-muted);
 	background: transparent;
 	border: 1px solid transparent;
@@ -450,6 +716,21 @@
 .tab:focus-visible {
 	outline: 1px solid var(--hl-local-accent);
 	outline-offset: 1px;
+}
+
+/* Vertical divider between adjacent inactive tabs */
+.horizon-layout-tabgroup__tab[data-tab-inactive]:not([data-hl-tab-first]):not(
+		[data-hl-prev-active]
+	)::before,
+.tab:not(.active):not(:first-child):not([data-prev-active])::before {
+	content: '';
+	position: absolute;
+	left: calc(-1 * (var(--hl-tab-gap) / 2 + 0.25px));
+	top: 0;
+	height: 100%;
+	width: 0.5px;
+	background: color-mix(in srgb, var(--hl-frame) 80%, transparent);
+	pointer-events: none;
 }
 
 /* Active tab: matches frame background and seamlessly merges into frame border & toolbar */
@@ -509,6 +790,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	letter-spacing: 0.01em;
+	font-size: 0.71rem;
 }
 
 .horizon-layout-tabgroup__tab-controls {
@@ -541,12 +823,16 @@
 	color: var(--hl-muted);
 	cursor: pointer;
 	flex-shrink: 0;
-	transition: color 60ms ease;
+	border-radius: var(--hl-radius);
+	transition:
+		color 60ms ease,
+		background 60ms ease;
 }
 
 .horizon-layout-tabgroup__tab-add:hover,
 .tab.add:hover {
 	color: var(--hl-fg);
+	background: color-mix(in srgb, var(--hl-fg) 8%, transparent) !important;
 }
 
 .horizon-layout-tabgroup__tab-add-icon {
@@ -574,6 +860,20 @@
 	display: inline-flex;
 	align-items: center;
 	flex-shrink: 0;
+	position: relative;
+	padding-right: 4px;
+	margin-right: 2px;
+}
+
+.horizon-layout-tabgroup__tab-cycle::after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 25%;
+	height: 50%;
+	width: 1px;
+	background: color-mix(in srgb, var(--hl-frame) 60%, transparent);
+	pointer-events: none;
 }
 
 .horizon-layout-tabgroup__tab-cycle-btn {
@@ -637,8 +937,20 @@
 	gap: 2px;
 	flex-shrink: 0;
 	margin-left: auto;
-	padding-left: 4px;
+	padding-left: 6px;
 	margin-bottom: 1px;
+	position: relative;
+}
+
+.horizon-layout-tabgroup__controls::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 25%;
+	height: 50%;
+	width: 1px;
+	background: color-mix(in srgb, var(--hl-frame) 60%, transparent);
+	pointer-events: none;
 }
 
 .horizon-layout-tabgroup__control {
@@ -670,9 +982,23 @@
 .horizon-layout-tabgroup__content {
 	width: 100%;
 	height: 100%;
+	min-width: 0;
+	min-height: 0;
 	overflow: auto;
 	background: var(--hl-active-bg);
 	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.hl-host {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
 }
 
 /* ── Toolbar ── */
@@ -750,6 +1076,7 @@
 
 .horizon-layout-tabgroup__toolbar-end {
 	margin-left: auto;
+	flex-shrink: 0;
 }
 
 /* First-class per-tab close button (rendered with `onCloseTab`). */
@@ -773,7 +1100,8 @@
 	transition:
 		opacity 60ms ease,
 		color 60ms ease,
-		background 60ms ease;
+		background 60ms ease,
+		transform var(--hl-motion-dur-fast) var(--hl-motion-ease);
 }
 
 .horizon-layout-tabgroup__tab:hover .horizon-layout-tabgroup__tab-close,
@@ -795,7 +1123,7 @@
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	font-size: 0.72rem;
 	line-height: 1.5;
-	padding: 2px 0;
+	padding: 0.75rem 1rem;
 	min-height: 2.75rem;
 }
 
@@ -835,8 +1163,41 @@
 	height: 100%;
 }
 
+.horizon-layout-split__resizer--horizontal::after {
+	display: none;
+}
+
 .horizon-layout-split__resizer--vertical {
 	width: 100%;
+}
+
+.horizon-layout-split__resizer--vertical::after {
+	display: none;
+}
+
+/* Split pane border sharing: where adjacent panes meet, use 0.5px borders so the joint is exactly 1px */
+.horizon-layout-split--horizontal
+	> .horizon-layout-split__pane:not([data-hl-pane-last])
+	.horizon-layout-tabgroup__body {
+	border-right-width: 0.5px;
+}
+
+.horizon-layout-split--horizontal
+	> .horizon-layout-split__pane:not([data-hl-pane-first])
+	.horizon-layout-tabgroup__body {
+	border-left-width: 0.5px;
+}
+
+.horizon-layout-split--vertical
+	> .horizon-layout-split__pane:not([data-hl-pane-last])
+	.horizon-layout-tabgroup__body {
+	border-bottom-width: 0.5px;
+}
+
+.horizon-layout-split--vertical
+	> .horizon-layout-split__pane:not([data-hl-pane-first])
+	.horizon-layout-tabgroup__body {
+	border-top-width: 0.5px;
 }
 
 .horizon-layout-split__resizer-handle {
@@ -930,18 +1291,20 @@
 
 /* ── Drag & Drop Hints and Zones ── */
 .horizon-layout-tabgroup__tab-drop-hint {
+	display: none;
 	flex: 0 0 2px;
+	width: 2px;
 	align-self: stretch;
 	margin-bottom: 1px;
 	border-radius: 2px;
-	background: transparent;
+	background: var(--hl-local-accent);
 	transition: background 40ms ease;
 	pointer-events: none;
 	position: relative;
 }
 
 .horizon-layout-tabgroup__tab-drop-hint--hover {
-	background: var(--hl-local-accent);
+	display: block;
 }
 
 .horizon-layout-tabgroup__tab-drop-zone {
@@ -964,7 +1327,13 @@
 }
 
 .horizon-layout-tabgroup__tab-drop-hint--end {
+	display: none;
 	flex: 0 0 2px;
+	width: 2px;
+}
+
+.horizon-layout-tabgroup__tab-drop-hint--end.horizon-layout-tabgroup__tab-drop-hint--hover {
+	display: block;
 }
 
 .horizon-layout-tabgroup__tab-drop-zone--end {
@@ -1028,6 +1397,178 @@
 
 .horizon-layout-tabgroup__drop-hint--left {
 	inset: 2px 50% 2px 2px;
+}
+
+/* ── Tab status ──
+   `View.tone` / `View.busy` / `View.badge` let pane content drive the tab's
+   colour, spinner and count without the host rendering its own chrome. */
+.horizon-layout-tabgroup__tab {
+	--hl-tone: var(--hl-local-accent);
+}
+
+.horizon-layout-tabgroup__tab[data-tone='neutral'] {
+	--hl-tone: var(--hl-muted);
+}
+
+.horizon-layout-tabgroup__tab[data-tone='success'] {
+	--hl-tone: var(--hl-tone-success);
+	--hl-local-accent: var(--hl-tone-success);
+}
+
+.horizon-layout-tabgroup__tab[data-tone='warning'] {
+	--hl-tone: var(--hl-tone-warning);
+	--hl-local-accent: var(--hl-tone-warning);
+}
+
+.horizon-layout-tabgroup__tab[data-tone='danger'] {
+	--hl-tone: var(--hl-tone-danger);
+	--hl-local-accent: var(--hl-tone-danger);
+}
+
+.horizon-layout-tabgroup__tab-icon {
+	color: var(--hl-tone);
+}
+
+.horizon-layout-tabgroup__tab-spinner {
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
+	border-radius: 50%;
+	border: 2px solid color-mix(in srgb, var(--hl-tone) 30%, transparent);
+	border-top-color: var(--hl-tone);
+	animation: hl-spin 0.7s linear infinite;
+}
+
+.horizon-layout-tabgroup__tab-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 5px;
+	margin-left: 2px;
+	border-radius: 999px;
+	font-size: 0.62rem;
+	font-weight: 600;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	color: var(--hl-tone);
+	background: color-mix(in srgb, var(--hl-tone) 22%, transparent);
+	flex-shrink: 0;
+}
+
+@keyframes hl-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ── Motion ──
+   Intensity is driven by the `data-motion` attribute (set from HorizonLayout's
+   `motion` prop, or on any ancestor / `:root` for host chrome). Tokens cascade,
+   so consumers can opt their drawers/sidebars/overlays into the same setting. */
+[data-motion='reduced'] {
+	--hl-motion-dur: 60ms;
+	--hl-motion-dur-fast: 45ms;
+}
+
+[data-motion='none'] {
+	--hl-motion-dur: 0ms;
+	--hl-motion-dur-fast: 0ms;
+}
+
+[data-motion='none'],
+[data-motion='none'] *,
+[data-motion='none'] *::before,
+[data-motion='none'] *::after {
+	transition: none !important;
+	animation: none !important;
+}
+
+/* A running spinner is status, not decoration — keep it turning even when
+   motion is disabled. */
+[data-motion='none'] .horizon-layout-tabgroup__tab-spinner {
+	animation: hl-spin 0.7s linear infinite !important;
+}
+
+/* Entry micro-interactions use the motion tokens. `reduced` keeps transitions
+   but drops the entry/zoom keyframes. */
+.horizon-layout-tabgroup {
+	animation: hl-pane-in var(--hl-motion-dur) var(--hl-motion-ease);
+}
+
+.horizon-layout-tabgroup__tab {
+	animation: hl-tab-in var(--hl-motion-dur) var(--hl-motion-ease);
+}
+
+.horizon-layout-tabgroup__tab-add {
+	transition:
+		color var(--hl-motion-dur-fast) ease,
+		transform var(--hl-motion-dur-fast) var(--hl-motion-ease);
+}
+
+.horizon-layout-tabgroup__tab-add:hover {
+	transform: scale(1.12);
+}
+
+.horizon-layout-tabgroup__tab-add:active {
+	transform: scale(0.94);
+}
+
+.horizon-layout-tabgroup__tab-close:hover {
+	transform: scale(1.15);
+}
+
+[data-motion='reduced'] .horizon-layout-tabgroup,
+[data-motion='reduced'] .horizon-layout-tabgroup__tab,
+[data-motion='reduced'] .horizon-layout__content--maximized {
+	animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.horizon-layout,
+	.horizon-layout *,
+	.horizon-layout *::before,
+	.horizon-layout *::after {
+		animation-duration: 1ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 1ms !important;
+	}
+
+	.horizon-layout-tabgroup__tab-spinner {
+		animation-duration: 1.4s !important;
+	}
+}
+
+@keyframes hl-pane-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes hl-tab-in {
+	from {
+		opacity: 0;
+		transform: translateY(3px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes hl-zoom-in {
+	from {
+		opacity: 0;
+		transform: scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 /* ── Popout Window ── */

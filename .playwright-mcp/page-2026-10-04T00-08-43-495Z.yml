@@ -1,0 +1,192 @@
+- generic [active] [ref=f1e1]:
+  - link "Skip to content" [ref=f1e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f1e3]:
+    - generic [ref=f1e4]:
+      - main [ref=f1e6]:
+        - generic [ref=f1e7]:
+          - generic [ref=f1e10]:
+            - generic [ref=f1e12]:
+              - generic [ref=f1e14]:
+                - button "NAVIGATION" [expanded] [ref=f1e15]
+                - list [ref=f1e21]:
+                  - listitem [ref=f1e22]:
+                    - link "Courses" [ref=f1e23] [cursor=pointer]:
+                      - /url: /fullscreen/dashboard
+                    - button "Pin item" [ref=f1e30]
+                  - listitem [ref=f1e36]:
+                    - link "Resources" [ref=f1e37] [cursor=pointer]:
+                      - /url: /fullscreen/orders
+                    - button "Pin item" [ref=f1e41]
+                  - listitem [ref=f1e47]:
+                    - link "Exercises" [ref=f1e48] [cursor=pointer]:
+                      - /url: /fullscreen/shipments
+                    - button "Pin item" [ref=f1e58]
+                  - listitem [ref=f1e64]:
+                    - link "Community" [ref=f1e65] [cursor=pointer]:
+                      - /url: /fullscreen/returns
+                    - button "Pin item" [ref=f1e69]
+                  - listitem [ref=f1e75]:
+                    - link "Arcade" [ref=f1e76] [cursor=pointer]:
+                      - /url: /fullscreen/products
+                    - button "Pin item" [ref=f1e83]
+              - generic [ref=f1e90]:
+                - button "ANALYTICS" [expanded] [ref=f1e91]
+                - list [ref=f1e97]:
+                  - listitem [ref=f1e98]:
+                    - link "Analytics" [ref=f1e99] [cursor=pointer]:
+                      - /url: /fullscreen/analytics
+                    - button "Pin item" [ref=f1e103]
+                  - listitem [ref=f1e109]:
+                    - link "Job Runs" [ref=f1e110] [cursor=pointer]:
+                      - /url: /fullscreen/job-runs
+                    - button "Pin item" [ref=f1e114]
+                  - listitem [ref=f1e120]:
+                    - link "Reconcile" [ref=f1e121] [cursor=pointer]:
+                      - /url: /fullscreen/reconcile
+                    - button "Pin item" [ref=f1e127]
+              - generic [ref=f1e134]:
+                - button "ACCOUNT" [expanded] [ref=f1e135]
+                - list [ref=f1e141]:
+                  - listitem [ref=f1e142]:
+                    - link "Settings" [ref=f1e143] [cursor=pointer]:
+                      - /url: /fullscreen/settings
+                    - button "Pin item" [ref=f1e148]
+                  - listitem [ref=f1e154]:
+                    - link "Help" [ref=f1e155] [cursor=pointer]:
+                      - /url: /help
+                    - button "Pin item" [ref=f1e160]
+                  - listitem [ref=f1e166]:
+                    - link "Feedback" [ref=f1e167] [cursor=pointer]:
+                      - /url: /feedback
+                    - button "Pin item" [ref=f1e171]
+            - list [ref=f1e178]:
+              - listitem [ref=f1e179]:
+                - button "T TurtleCode Demo demo@pocketflow.dev" [ref=f1e180]:
+                  - generic [ref=f1e181]: T
+                  - generic [ref=f1e183]:
+                    - generic [ref=f1e184]: TurtleCode Demo
+                    - generic [ref=f1e185]: demo@pocketflow.dev
+          - main [ref=f1e186]:
+            - generic [ref=f1e188]:
+              - button "Toggle Sidebar" [ref=f1e189]
+              - separator [ref=f1e191]
+              - navigation "Breadcrumb" [ref=f1e192]:
+                - button "turtle_academy turtle_academy" [ref=f1e193]:
+                  - img "turtle_academy" [ref=f1e194]
+                  - generic [ref=f1e195]: turtle_academy
+                - generic [ref=f1e198]:
+                  - link "Fullscreen" [ref=f1e199] [cursor=pointer]:
+                    - /url: /fullscreen
+                  - generic [ref=f1e202]: Dashboard
+              - generic [ref=f1e203]:
+                - button "Open search" [ref=f1e204]
+                - generic [ref=f1e205]:
+                  - heading "Command Palette" [level=2] [ref=f1e206]
+                  - generic [ref=f1e207]: Search for a command to run...
+                - button "Pin Courses" [ref=f1e208]
+                - button [ref=f1e209]
+                - button [ref=f1e210]
+                - link [ref=f1e211] [cursor=pointer]:
+                  - /url: /settings
+            - generic [ref=f1e214]:
+              - generic [ref=f1e215]:
+                - generic [ref=f1e216]:
+                  - heading "Courses" [level=1] [ref=f1e217]
+                  - paragraph [ref=f1e218]: Manage curriculum, track learner progress, and publish updates across your academy.
+                - generic [ref=f1e219]:
+                  - link "Insights" [ref=f1e220] [cursor=pointer]:
+                    - /url: /fullscreen/analytics
+                  - button "New course" [ref=f1e222]
+              - generic [ref=f1e224]:
+                - generic [ref=f1e225]:
+                  - generic [ref=f1e226]:
+                    - paragraph [ref=f1e227]: Total courses
+                    - generic [ref=f1e228]: "5"
+                  - generic [ref=f1e229]: Across this workspace
+                - generic [ref=f1e230]:
+                  - generic [ref=f1e231]:
+                    - paragraph [ref=f1e232]: Published
+                    - generic [ref=f1e233]: "5"
+                  - generic [ref=f1e234]: Live in catalog
+                - generic [ref=f1e235]:
+                  - generic [ref=f1e236]:
+                    - paragraph [ref=f1e237]: In progress
+                    - generic [ref=f1e238]: "4"
+                  - generic [ref=f1e239]: Learners actively enrolled
+                - generic [ref=f1e240]:
+                  - generic [ref=f1e241]:
+                    - paragraph [ref=f1e242]: Avg. completion
+                    - generic [ref=f1e243]: 36%
+                  - generic [ref=f1e244]: Mean progress across courses
+              - region "Search and filters" [ref=f1e245]:
+                - generic [ref=f1e246]:
+                  - button "Grid view" [pressed] [ref=f1e247]
+                  - button "List view" [ref=f1e248]
+                - searchbox "Search courses by title, description, or level…" [ref=f1e250]
+                - generic [ref=f1e251]:
+                  - button "All statuses" [ref=f1e252]
+                  - button "Recently updated" [ref=f1e254]
+              - generic [ref=f1e256]:
+                - button "Full Stack Development published Build complete web applications with modern technologies All levels Updated Jan 4, 2025 80%" [ref=f1e257]:
+                  - generic [ref=f1e261]:
+                    - generic [ref=f1e262]:
+                      - generic [ref=f1e263]: Full Stack Development
+                      - generic [ref=f1e264]: published
+                    - paragraph [ref=f1e265]: Build complete web applications with modern technologies
+                  - generic [ref=f1e266]:
+                    - generic [ref=f1e267]:
+                      - generic [ref=f1e268]: All levels
+                      - generic [ref=f1e269]: Updated Jan 4, 2025
+                    - generic [ref=f1e270]: 80%
+                - button "Advanced JavaScript published Master advanced JavaScript concepts and modern development practices All levels Updated Jan 3, 2025 15%" [ref=f1e272]:
+                  - generic [ref=f1e276]:
+                    - generic [ref=f1e277]:
+                      - generic [ref=f1e278]: Advanced JavaScript
+                      - generic [ref=f1e279]: published
+                    - paragraph [ref=f1e280]: Master advanced JavaScript concepts and modern development practices
+                  - generic [ref=f1e281]:
+                    - generic [ref=f1e282]:
+                      - generic [ref=f1e283]: All levels
+                      - generic [ref=f1e284]: Updated Jan 3, 2025
+                    - generic [ref=f1e285]: 15%
+                - button "Python Fundamentals published Learn the basics of Python programming language All levels Updated Jan 2, 2025 0%" [ref=f1e287]:
+                  - generic [ref=f1e291]:
+                    - generic [ref=f1e292]:
+                      - generic [ref=f1e293]: Python Fundamentals
+                      - generic [ref=f1e294]: published
+                    - paragraph [ref=f1e295]: Learn the basics of Python programming language
+                  - generic [ref=f1e296]:
+                    - generic [ref=f1e297]:
+                      - generic [ref=f1e298]: All levels
+                      - generic [ref=f1e299]: Updated Jan 2, 2025
+                    - generic [ref=f1e300]: 0%
+                - button "React Development published Build modern web applications with React All levels Updated Jan 1, 2025 60%" [ref=f1e302]:
+                  - generic [ref=f1e306]:
+                    - generic [ref=f1e307]:
+                      - generic [ref=f1e308]: React Development
+                      - generic [ref=f1e309]: published
+                    - paragraph [ref=f1e310]: Build modern web applications with React
+                  - generic [ref=f1e311]:
+                    - generic [ref=f1e312]:
+                      - generic [ref=f1e313]: All levels
+                      - generic [ref=f1e314]: Updated Jan 1, 2025
+                    - generic [ref=f1e315]: 60%
+                - button "JavaScript Fundamentals published Learn the fundamentals of JavaScript programming All levels Updated Dec 31, 2024 25%" [ref=f1e317]:
+                  - generic [ref=f1e321]:
+                    - generic [ref=f1e322]:
+                      - generic [ref=f1e323]: JavaScript Fundamentals
+                      - generic [ref=f1e324]: published
+                    - paragraph [ref=f1e325]: Learn the fundamentals of JavaScript programming
+                  - generic [ref=f1e326]:
+                    - generic [ref=f1e327]:
+                      - generic [ref=f1e328]: All levels
+                      - generic [ref=f1e329]: Updated Dec 31, 2024
+                    - generic [ref=f1e330]: 25%
+                - button "Create new course" [ref=f1e332]:
+                  - generic [ref=f1e335]: New course
+              - generic [ref=f1e336]: Showing 5 of 5 courses
+      - generic [ref=f1e338]:
+        - heading "Command Palette" [level=2] [ref=f1e339]
+        - generic [ref=f1e340]: Search for a command to run...
+    - region "Notifications alt+T"

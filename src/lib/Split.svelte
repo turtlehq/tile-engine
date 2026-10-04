@@ -34,7 +34,8 @@
 		toolbarStart,
 		toolbarEnd,
 		onCloseTab,
-		onActivate
+		onActivate,
+		onCycleTab
 	}: {
 		config: SplitConfig;
 		views: SvelteMap<Id, View>;
@@ -64,6 +65,7 @@
 		toolbarEnd?: Snippet<[Id]>;
 		onCloseTab?: (viewId: Id) => void;
 		onActivate?: (tabGroup: TabGroupConfig) => void;
+		onCycleTab?: (tabGroup: TabGroupConfig, delta: -1 | 1) => void;
 	} = $props();
 
 	let splitContainer = $state<HTMLElement | null>(null);
@@ -188,6 +190,7 @@
 				{toolbarEnd}
 				{onCloseTab}
 				{onActivate}
+				{onCycleTab}
 			></HorizonLayoutNode>
 		</div>
 

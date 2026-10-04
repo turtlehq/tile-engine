@@ -1,0 +1,15 @@
+- banner [ref=e3]:
+  - link "← HorizonLayout" [ref=e4] [cursor=pointer]:
+    - /url: /
+  - generic [ref=e5]: fullscreen workspace
+  - generic [ref=e6]:
+    - text: "active:"
+    - code [ref=e7]: —
+  - button "Commands ⌘K" [ref=e8] [cursor=pointer]:
+    - text: Commands
+    - generic [ref=e9]: ⌘K
+  - 'button "Theme: dark" [ref=e10] [cursor=pointer]'
+  - button "Fullscreen" [ref=e11] [cursor=pointer]
+  - button "Settings ⌘⇧," [ref=e12] [cursor=pointer]:
+    - text: Settings
+    - generic [ref=e13]: ⌘⇧,

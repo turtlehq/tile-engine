@@ -4,6 +4,7 @@
 		Id,
 		KeyboardControls,
 		LayoutConfig,
+		Motion,
 		NodeConfig,
 		ParentEntry,
 		SplitConfig,
@@ -21,7 +22,13 @@
 		cloneConfig,
 		validateConfig
 	} from './utils.ts';
-	import { findFirstTabGroup, findTabGroupForViewId } from './operations.ts';
+	import {
+		findFirstTabGroup,
+		findTabGroupForViewId,
+		selectAdjacentTabDrillingGroups,
+		primaryActiveTabId,
+		GROUP_VIEW_PREFIX
+	} from './operations.ts';
 	import { DEFAULT_MIN_WIDTH_RATIO, DEFAULT_MIN_HEIGHT_RATIO } from './internal-utils.ts';
 	import { dropTargetType } from './internal-utils.ts';
 	import type { DropTarget } from './internal-types.ts';
@@ -239,13 +246,19 @@
 		paneToolbar,
 		keepAlive = false,
 		tabCycleButtons = false,
+		groupLayouts,
+		onCycleTab,
 		onRenameTab,
 		toolbarStart,
 		toolbarEnd,
 		onCloseTab,
 		surface = 'flush',
 		activeView = $bindable(undefined),
-		onActiveViewChange
+		onActiveViewChange,
+		dimOtherPanes = true,
+		dimOtherPanesOnHover = undefined,
+		motion = 'full',
+		statusBar
 	}: {
 		/** The layout configuration. Bind this to keep it in sync with user interactions. */
 		config: LayoutConfig;
@@ -296,6 +309,10 @@
 		keepAlive?: boolean;
 		/** Show prev/next cycle buttons on tab groups with more than one tab. */
 		tabCycleButtons?: boolean;
+		/** Group layouts for nested group panes; enables drilling tab navigation. */
+		groupLayouts?: Record<string, LayoutConfig>;
+		/** Optional callback invoked when next/prev tab is cycled in a tab group. */
+		onCycleTab?: (tabGroup: TabGroupConfig, delta: -1 | 1) => void;
 		/** Called with the committed title when a tab is renamed inline. */
 		onRenameTab?: (tabId: Id, title: string) => void;
 		/** Content rendered at the start (left) of every pane toolbar. */
@@ -310,7 +327,26 @@
 		activeView?: Id;
 		/** Called when the active pane changes. */
 		onActiveViewChange?: (viewId: Id) => void;
+		/** When true, hovering over any pane slightly dims all other unhovered panes. Default: true. */
+		dimOtherPanes?: boolean;
+		/** Alias for dimOtherPanes. */
+		dimOtherPanesOnHover?: boolean;
+		/**
+		 * Motion intensity for micro-interactions and animations. Also exposed as
+		 * a `data-motion` attribute on the root so consumers can gate their own
+		 * chrome (drawers, sidebars, overlays). Default: 'full'.
+		 */
+		motion?: Motion;
+		/**
+		 * Optional content rendered in a bottom status-bar region. The snippet is
+		 * placed inside a grid footer with left/center/right columns; use the
+		 * `horizon-layout__status-bar-cluster`, `__status-bar-center` and
+		 * `__status-bar-item` helpers to build the bar.
+		 */
+		statusBar?: Snippet;
 	} = $props();
+
+	let shouldDimOtherPanes = $derived(dimOtherPanesOnHover ?? dimOtherPanes);
 
 	// The layout operates on a validated internal copy so that invalid external
 	// configs are caught at the boundary without corrupting the running state.
@@ -323,12 +359,74 @@
 	// The active pane is the tab group under the pointer (hover) or keyboard
 	// focus. Its active tab is the target for the action catalog / layout handle,
 	// so consumers never re-implement focus tracking.
+	function resolveActiveLeaf(viewId: Id): Id {
+		if (groupLayouts) {
+			const isPrefixed = viewId.startsWith(GROUP_VIEW_PREFIX);
+			const gid = isPrefixed ? viewId.slice(GROUP_VIEW_PREFIX.length) : viewId;
+			const inner = groupLayouts[gid] ?? groupLayouts[viewId];
+			if (inner?.root) {
+				const innerLeaf = primaryActiveTabId(inner);
+				if (innerLeaf) return innerLeaf;
+			}
+		}
+		return viewId;
+	}
+
 	function activateGroup(tabGroup: TabGroupConfig) {
-		const next = tabGroup.tabs[tabGroup.activeTabIndex];
-		if (next && next !== activeView) {
+		const raw = tabGroup.tabs[tabGroup.activeTabIndex];
+		if (!raw) return;
+		const next = resolveActiveLeaf(raw);
+		if (next !== activeView) {
 			activeView = next;
 			onActiveViewChange?.(next);
 		}
+	}
+
+	function handleCycleTab(tabGroup: TabGroupConfig, delta: -1 | 1) {
+		if (onCycleTab) {
+			onCycleTab(tabGroup, delta);
+			return;
+		}
+		if (groupLayouts && internalConfig) {
+			const activeId = tabGroup.tabs[tabGroup.activeTabIndex] ?? activeView;
+			if (activeId) {
+				const result = selectAdjacentTabDrillingGroups(internalConfig, activeId, delta, groupLayouts);
+				if (result) {
+					internalConfig = result.config;
+					config = cloneConfig(result.config);
+					for (const [gid, glayout] of Object.entries(result.groupUpdates)) {
+						groupLayouts[gid] = glayout;
+					}
+					if (result.focusViewId) {
+						activeView = result.focusViewId;
+						onActiveViewChange?.(result.focusViewId);
+					}
+					return;
+				}
+			}
+		}
+		const next = tabGroup.activeTabIndex + delta;
+		if (next >= 0 && next < tabGroup.tabs.length) {
+			tabGroup.activeTabIndex = next;
+		}
+	}
+
+	function resolveOuterTabGroupForView(root: NodeConfig, viewId: Id): TabGroupConfig | null {
+		const direct = findTabGroupForViewId(root, viewId);
+		if (direct) return direct;
+		if (groupLayouts) {
+			for (const [gid, glayout] of Object.entries(groupLayouts)) {
+				if (glayout?.root && findTabGroupForViewId(glayout.root, viewId)) {
+					const parent =
+						findTabGroupForViewId(root, gid) ??
+						(gid.startsWith(GROUP_VIEW_PREFIX)
+							? findTabGroupForViewId(root, gid.slice(GROUP_VIEW_PREFIX.length))
+							: findTabGroupForViewId(root, `${GROUP_VIEW_PREFIX}${gid}`));
+					if (parent) return parent;
+				}
+			}
+		}
+		return null;
 	}
 
 	// Keep `activeView` pointing at a live tab: seed it on first render, follow
@@ -339,19 +437,23 @@
 		if (!root) return;
 		if (!activeView) {
 			const first = findFirstTabGroup(root);
-			const next = first.tabs[first.activeTabIndex];
-			if (next) {
+			const raw = first.tabs[first.activeTabIndex];
+			if (raw) {
+				const next = resolveActiveLeaf(raw);
 				activeView = next;
 				onActiveViewChange?.(next);
 			}
 			return;
 		}
-		const group = findTabGroupForViewId(root, activeView);
+		const group = resolveOuterTabGroupForView(root, activeView);
 		if (!group) return;
-		const next = group.tabs[group.activeTabIndex];
-		if (next && next !== activeView) {
-			activeView = next;
-			onActiveViewChange?.(next);
+		const raw = group.tabs[group.activeTabIndex];
+		if (raw) {
+			const next = resolveActiveLeaf(raw);
+			if (next !== activeView) {
+				activeView = next;
+				onActiveViewChange?.(next);
+			}
 		}
 	});
 
@@ -848,7 +950,14 @@
 
 <svelte:window onkeydown={handleWindowKeyDown} />
 
-<div class={baseClass} data-surface={surface}>
+<div
+	class={baseClass}
+	data-surface={surface}
+	data-motion={motion}
+	data-dim-unhovered={shouldDimOtherPanes ? 'true' : undefined}
+	data-dragging={dragData !== null ? 'true' : undefined}
+	data-status-bar={statusBar ? 'true' : undefined}
+>
 	{#if internalConfig}
 		{#if internalConfig.maximizedView}
 			{@const view = views.get(internalConfig.maximizedView)}
@@ -926,8 +1035,14 @@
 					{toolbarEnd}
 					{onCloseTab}
 					onActivate={activateGroup}
+					onCycleTab={handleCycleTab}
 				></HorizonLayoutNode>
 			</div>
 		{/if}
+	{/if}
+	{#if statusBar}
+		<footer class="{baseClass}__status-bar" aria-label="Status bar">
+			{@render statusBar()}
+		</footer>
 	{/if}
 </div>

@@ -273,6 +273,10 @@
 							<input type="checkbox" bind:checked={settings.tabCycleButtons} />
 							<span>Tab cycle buttons</span>
 						</label>
+						<label class="settings-toggle">
+							<input type="checkbox" bind:checked={settings.dimOtherPanes} />
+							<span>Dim other panes on hover</span>
+						</label>
 					</div>
 				{:else}
 					<div class="settings-grid">
@@ -290,6 +294,14 @@
 								<option value="flush">Flush</option>
 								<option value="card">Rounded card</option>
 								<option value="inset">Inset well</option>
+							</select>
+						</label>
+						<label class="settings-field">
+							<span>Motion</span>
+							<select bind:value={settings.motion}>
+								<option value="full">Full</option>
+								<option value="reduced">Reduced</option>
+								<option value="none">None</option>
 							</select>
 						</label>
 						<label class="settings-field">
@@ -359,6 +371,18 @@
 		border-radius: 10px;
 		box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
 		overflow: hidden;
+		animation: settings-modal-in var(--hl-motion-dur, 150ms) var(--hl-motion-ease, ease);
+	}
+
+	@keyframes settings-modal-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(0.985);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 
 	.settings-modal__header {

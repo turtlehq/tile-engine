@@ -1,0 +1,3 @@
+[ 3306679ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5199/fullscreen:0
+[ 3314711ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5199/fullscreen:0
+[ 5907914ms] [ERROR] HorizonLayout: unknown tab id "g-notes" @ http://localhost:5199/src/lib/HorizonLayout.svelte?t=1791080830962:486

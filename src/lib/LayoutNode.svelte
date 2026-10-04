@@ -42,7 +42,8 @@
 		toolbarStart,
 		toolbarEnd,
 		onCloseTab,
-		onActivate
+		onActivate,
+		onCycleTab
 	}: {
 		config: NodeConfig;
 		views: SvelteMap<Id, View>;
@@ -72,6 +73,7 @@
 		toolbarEnd?: Snippet<[Id]>;
 		onCloseTab?: (viewId: Id) => void;
 		onActivate?: (tabGroup: TabGroupConfig) => void;
+		onCycleTab?: (tabGroup: TabGroupConfig, delta: -1 | 1) => void;
 	} = $props();
 </script>
 
@@ -105,6 +107,7 @@
 		{toolbarEnd}
 		{onCloseTab}
 		{onActivate}
+		{onCycleTab}
 	></HorizonSplit>
 {:else}
 	<HorizonTabGroup
@@ -130,5 +133,6 @@
 		{toolbarEnd}
 		{onCloseTab}
 		{onActivate}
+		{onCycleTab}
 	></HorizonTabGroup>
 {/if}
